@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyToken } from './lib/auth'
+import { verifyToken } from './lib/token'
 
 // 公开路径列表（无需认证）
 const publicPaths = ['/login', '/api/auth/login', '/api/auth/captcha']
@@ -36,13 +36,13 @@ export async function proxy(request: NextRequest) {
   // API 路由的认证处理
   if (pathname.startsWith('/api/')) {
     const token = request.cookies.get('auth_token')?.value ||
-                  request.headers.get('authorization')?.replace('Bearer ', '')
+      request.headers.get('authorization')?.replace('Bearer ', '')
 
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
@@ -64,7 +64,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  const payload = verifyToken(token)
+  const payload = await verifyToken(token)
   if (!payload) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyPassword, generateToken } from '@/lib/auth'
+import { verifyPassword } from '@/lib/auth'
+import { generateToken } from '@/lib/token'
 import { verifyCaptcha } from '@/lib/captcha'
 import type { LoginRequest, LoginResponse } from '@/types'
 
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
       .map((m: any) => m.permission!)
 
     // 生成 Token
-    const token = generateToken({
+    const token = await generateToken({
       userId: user.userId,
       userDomain: user.userDomain,
       loginName: user.loginName || '',
