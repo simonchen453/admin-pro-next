@@ -1,0 +1,681 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// RBAC 核心模块 (11 张表)
+// ============================================
+
+/// 用户域表（多租户）
+model SysUserDomain {
+  id                  String   @id @map("col_id") @default(uuid())
+  name                String   @unique @map("col_name")
+  display             String?  @map("col_display")
+  isSystem            Boolean  @map("col_is_system") @default(false)
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_user_domain_tbl")
+}
+
+/// 用户域环境配置表
+model SysUserDomainEnv {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String   @unique @map("col_user_domain")
+  commonRole          String?  @map("col_common_role")
+  description         String?  @map("col_description")
+  errorPageUrl        String?  @map("col_error_page_url")
+  fatalErrorPageUrl   String?  @map("col_fatal_error_page_url")
+  homePageUrl         String?  @map("col_home_page_url")
+  loginUrl            String?  @map("col_login_url")
+  layout              String?  @map("col_layout")
+  sessionExpiredUrl   String?  @map("col_session_expired_url")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_user_domain_env_tbl")
+}
+
+/// 用户表
+model SysUser {
+  id                   String     @id @map("col_id") @default(uuid())
+  userDomain           String     @map("col_user_domain")
+  userId               String     @map("col_user_id")
+  loginName            String?    @map("col_login_name")
+  display              String?    @map("col_display")
+  realName             String?    @map("col_real_name")
+  idNo                 String?    @map("col_id_no")
+  email                String?    @map("col_email")
+  status               String?    @map("col_status") @default("active")
+  authenticated        Boolean    @map("col_authenticated") @default(false)
+  mobileNo             String?    @map("col_mobile_no")
+  isSystem             Boolean    @map("col_is_system") @default(false)
+  address              String?    @map("col_address")
+  pwd                  String?    @map("col_pwd")
+  birthday             DateTime?  @map("col_birthday")
+  sex                  String?    @map("col_sex")
+  marital              String?    @map("col_marital")
+  nation               String?    @map("col_nation")
+  payNoPwd             Int?       @map("col_pay_no_pwd")
+  payPwd               String?    @map("col_pay_pwd")
+  payNoPwdPoint        Int?       @map("col_pay_no_pwd_point")
+  avatarUrl            String?    @map("col_avatar_url")
+  post                 String?    @map("col_post")
+  profession           String?    @map("col_profession")
+  constellation        String?    @map("col_constellation")
+  thirdPartyUserName   String?    @map("col_third_party_user_name")
+  thirdPartyPwd        String?    @map("col_third_party_pwd")
+  jobNo                String?    @map("col_job_no")
+  extUserId            String?    @unique @map("col_ext_user_id")
+  authenticateDate     DateTime?  @map("col_authenticate_date")
+  latestLoginTime      DateTime?  @map("col_latest_login_time")
+  latestChangePwdTime  DateTime?  @map("col_latest_change_pwd_time")
+  description          String?    @map("col_description")
+  deptNo               String?    @map("col_dept_no")
+  shareCode            String?    @unique @map("col_share_code")
+  parentShareCode      String?    @map("col_parent_share_code")
+  integral             BigInt     @default(0) @map("col_integral")
+  province             String?    @map("col_province")
+  city                 String?    @map("col_city")
+  district             String?    @map("col_district")
+  createdByUserDomain  String?    @map("col_created_by_user_domain")
+  createdByUserId      String?    @map("col_created_by_user_id")
+  createdDate          DateTime?  @map("col_created_date") @default(now())
+  updatedByUserDomain  String?    @map("col_updated_by_user_domain")
+  updatedByUserId      String?    @map("col_updated_by_user_id")
+  updatedDate          DateTime?  @map("col_updated_date") @updatedAt
+
+  @@unique([userDomain, userId], name: "unq_user_domain")
+  @@map("sys_user_tbl")
+}
+
+/// 用户简况表
+model SysUserProfile {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String   @map("col_user_domain")
+  userId              String   @map("col_user_id")
+  showAge             Int      @map("col_show_age") @default(1)
+  showProfession      Int      @map("col_show_profession") @default(1)
+  showFootprint       Int      @map("col_show_footprint") @default(1)
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_user_profile_tbl")
+}
+
+/// 用户标签表
+model SysUserTag {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String   @map("col_user_domain")
+  userId              String   @map("col_user_id")
+  tag                 String   @map("col_tag")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_user_tag_tbl")
+}
+
+/// 用户Token表
+model SysUserToken {
+  id                  String   @id @map("col_id") @default(uuid())
+  token               String   @unique @map("col_token")
+  userDomain          String   @map("col_user_domain")
+  userId              String   @map("col_user_id")
+  loginName           String?  @map("col_login_name")
+  device              String?  @map("col_device")
+  expireTime          DateTime? @map("col_expire_time")
+  status              String?  @map("col_status") @default("active")
+  updateTime          DateTime? @map("col_update_time")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_user_token_tbl")
+}
+
+/// 角色表
+model SysRole {
+  id                  String   @id @map("col_id") @default(uuid())
+  name                String   @unique @map("col_name")
+  display             String?  @map("col_display")
+  status              String?  @map("col_status") @default("active")
+  isSystem            Boolean  @map("col_is_system") @default(false)
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_role_tbl")
+}
+
+/// 菜单权限表
+model SysMenu {
+  id                  String    @id @map("col_id") @default(uuid())
+  name                String    @unique @map("col_name")
+  display             String?   @map("col_display")
+  parentId            String?   @map("col_parent_id")
+  orderNum            Int       @default(0) @map("col_order_num")
+  url                 String?   @map("col_url")
+  isFrame             Int?      @map("col_is_frame") @default(0)
+  type                String?   @map("col_type") @default("C")
+  visible             String    @default("show") @map("col_visible")
+  status              String?   @map("col_status") @default("active")
+  permission          String?   @map("col_permission")
+  icon                String?   @map("col_icon")
+  remark              String?   @map("col_remark")
+  createdByUserDomain String?   @map("col_created_by_user_domain")
+  createdByUserId     String?   @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?   @map("col_updated_by_user_domain")
+  updatedByUserId     String?   @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_menu_tbl")
+}
+
+/// 部门表
+model SysDept {
+  id                  String    @id @map("col_id") @default(uuid())
+  no                  String    @unique @map("col_no")
+  parentId            String    @map("col_parent_id")
+  ancestors           String    @map("col_ancestors")
+  name                String?   @map("col_name")
+  orderNum            Int?      @map("col_order_num")
+  delFlag             Int?      @map("col_del_flag") @default(0)
+  description         String?   @map("col_description")
+  linkman             String?   @map("col_linkman")
+  contact             String?   @map("col_contact")
+  phone               String?   @map("col_phone")
+  email               String?   @map("col_email")
+  status              String?   @map("col_status") @default("active")
+  logoPath            String?   @map("col_logo_path")
+  customLogin         Int       @default(0) @map("col_custom_login")
+  createdByUserDomain String?   @map("col_created_by_user_domain")
+  createdByUserId     String?   @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?   @map("col_updated_by_user_domain")
+  updatedByUserId     String?   @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_dept_tbl")
+}
+
+/// 岗位表
+model SysPost {
+  id                  String   @id @map("col_id") @default(uuid())
+  code                String   @unique @map("col_code")
+  name                String   @map("col_name")
+  display             String?  @map("col_display")
+  orderNum            Int      @default(0) @map("col_order_num")
+  status              String?  @map("col_status") @default("active")
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_post_tbl")
+}
+
+/// 用户-角色关联表
+model SysUserRoleAssign {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String   @map("col_user_domain")
+  userId              String   @map("col_user_id")
+  roleName            String   @map("col_role_name")
+  remarks             String?  @map("col_remarks")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@unique([userDomain, userId, roleName], name: "unq_user_role")
+  @@map("sys_user_role_assign_tbl")
+}
+
+/// 用户-菜单关联表
+model SysUserMenuAssign {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String   @map("col_user_domain")
+  userId              String   @map("col_user_id")
+  menuName            String   @map("col_menu_name")
+  remarks             String?  @map("col_remarks")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@unique([userDomain, userId, menuName], name: "unq_user_menu")
+  @@map("sys_user_menu_assign_tbl")
+}
+
+/// 用户-岗位关联表
+model SysUserPostAssign {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String   @map("col_user_domain")
+  userId              String   @map("col_user_id")
+  postCode            String   @map("col_post_code")
+  remarks             String?  @map("col_remarks")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@unique([userDomain, userId, postCode], name: "unq_user_post")
+  @@map("sys_user_post_assign_tbl")
+}
+
+/// 角色-菜单关联表
+model SysRoleMenuAssign {
+  id                  String   @id @map("col_id") @default(uuid())
+  roleName            String   @map("col_role_name")
+  menuName            String   @map("col_menu_name")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@unique([roleName, menuName], name: "unique_idx")
+  @@map("sys_role_menu_assign_tbl")
+}
+
+// ============================================
+// 系统工具模块 (5 张表)
+// ============================================
+
+/// 系统参数配置表
+model SysConfig {
+  id                  String   @id @map("col_id") @default(uuid())
+  key                 String   @unique @map("col_key")
+  name                String?  @map("col_name")
+  value               String?  @map("col_value")
+  system              Int      @default(0) @map("col_system")
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_config_tbl")
+}
+
+/// 字典类型表
+model SysDict {
+  id                  String   @id @map("col_id") @default(uuid())
+  name                String   @unique @map("col_name")
+  display             String?  @map("col_display")
+  status              String?  @map("col_status") @default("active")
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_dict_tbl")
+}
+
+/// 字典数据表
+model SysDictData {
+  id                  String   @id @map("col_id") @default(uuid())
+  dictName            String   @map("col_dict_name")
+  display             String?  @map("col_display")
+  value               String?  @map("col_value")
+  orderNum            Int      @default(0) @map("col_order_num")
+  status              String?  @map("col_status") @default("active")
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_dict_data_tbl")
+}
+
+/// 定时任务表
+model SysScheduleJob {
+  id                  String   @id @map("col_id") @default(uuid())
+  name                String   @unique @map("col_name")
+  display             String?  @map("col_display")
+  cron                String?  @map("col_cron")
+  className           String?  @map("col_class_name")
+  status              String?  @map("col_status") @default("inactive")
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_schedule_job_tbl")
+}
+
+/// 定时任务日志表
+model SysScheduleJobLog {
+  id                  String   @id @map("col_id") @default(uuid())
+  jobName             String   @map("col_job_name")
+  className           String?  @map("col_class_name")
+  startTime           DateTime? @map("col_start_time")
+  endTime             DateTime? @map("col_end_time")
+  status              String?  @map("col_status")
+  errorMsg            String?  @db.Text @map("col_error_msg")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_schedule_job_log_tbl")
+}
+
+// ============================================
+// 日志审计模块 (3 张表)
+// ============================================
+
+/// 系统日志表
+model SysSysLog {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String?  @map("col_user_domain")
+  userId              String?  @map("col_user_id")
+  ip                  String?  @map("col_ip")
+  browser             String?  @map("col_browser")
+  method              String?  @map("col_method")
+  os                  String?  @map("col_os")
+  params              String?  @db.MediumText @map("col_params")
+  response            String?  @db.LongText @map("col_response")
+  time                BigInt?  @map("col_time")
+  category            String?  @map("col_category")
+  module              String?  @map("col_module")
+  status              String?  @map("col_status")
+  description         String?  @map("col_description")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_sys_log_tbl")
+}
+
+/// 审计日志表
+model SysAuditLog {
+  id                  String   @id @map("col_id") @default(uuid())
+  category            String?  @map("col_category")
+  module              String?  @map("col_module")
+  ipAddress           String?  @map("col_ip_address")
+  status              String?  @map("col_status")
+  event               String?  @map("col_event")
+  beforeData          String?  @db.MediumText @map("col_before_data")
+  afterData           String?  @db.MediumText @map("col_after_data")
+  sessionId           String?  @map("col_session_id")
+  executionTime       BigInt?  @map("col_execution_time")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_audit_log_tbl")
+}
+
+/// 异常日志表
+model SysExceptionLog {
+  id                  String   @id @map("col_id") @default(uuid())
+  type                String?  @db.Text @map("col_type")
+  path                String?  @map("col_path")
+  details             String?  @db.MediumText @map("col_details")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_exception_log")
+}
+
+// ============================================
+// 监控管理模块 (2 张表)
+// ============================================
+
+/// 用户会话表
+model SysSession {
+  id                     String   @id @map("col_id") @default(uuid())
+  sessionId              String   @unique @map("col_session_id")
+  thirdPartySessionId    String?  @map("col_third_party_session_id")
+  status                 String?  @map("col_status") @default("active")
+  userDomain             String?  @map("col_user_domain")
+  userId                 String?  @map("col_user_id")
+  loginName              String?  @map("col_login_name")
+  ipAddr                 String?  @map("col_ip_addr")
+  loginLocation          String?  @map("col_login_location")
+  browser                String?  @map("col_browser")
+  os                     String?  @map("col_os")
+  deptNo                 String?  @map("col_dept_no")
+  createdByUserDomain    String?  @map("col_created_by_user_domain")
+  createdByUserId        String?  @map("col_created_by_user_id")
+  createdDate            DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain    String?  @map("col_updated_by_user_domain")
+  updatedByUserId        String?  @map("col_updated_by_user_id")
+  updatedDate            DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_session_tbl")
+}
+
+/// 登录记录表
+model SysLoginInfo {
+  id                  String   @id @map("col_id") @default(uuid())
+  userDomain          String?  @map("col_user_domain")
+  userId              String?  @map("col_user_id")
+  loginName           String?  @map("col_login_name")
+  ipAddr              String?  @map("col_ip_addr")
+  loginLocation       String?  @map("col_login_location")
+  browser             String?  @map("col_browser")
+  os                  String?  @map("col_os")
+  status              String?  @map("col_status")
+  errorMsg            String?  @map("col_error_msg")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_login_info_tbl")
+}
+
+// ============================================
+// 文件管理模块 (1 张表)
+// ============================================
+
+/// 文件存储表
+model SysOss {
+  id                  String   @id @map("col_id") @default(uuid())
+  url                 String?  @map("col_url")
+  key                 String?  @map("col_key")
+  hash                String?  @map("col_hash")
+  suffix              String?  @map("col_suffix")
+  original            String?  @map("col_original")
+  size                BigInt?  @map("col_size")
+  batchId             String?  @map("col_batch_id")
+  type                String?  @map("col_type")
+  cover               String?  @map("col_cover")
+  coverKey            String?  @map("col_cover_key")
+  status              String?  @map("col_status") @default("active")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_oss_tbl")
+}
+
+// ============================================
+// 业务支撑模块 (8 张表)
+// ============================================
+
+/// 任务表
+model SysTask {
+  id                  String   @id @map("col_id") @default(uuid())
+  name                String   @unique @map("col_name")
+  display             String?  @map("col_display")
+  type                String?  @map("col_type")
+  status              String?  @map("col_status") @default("pending")
+  priority            Int?     @map("col_priority") @default(0)
+  assignee            String?  @map("col_assignee")
+  dueDate             DateTime? @map("col_due_date")
+  completedDate       DateTime? @map("col_completed_date")
+  progress            Int?     @map("col_progress") @default(0)
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_task_tbl")
+}
+
+/// 任务日志表
+model SysTaskLog {
+  id                  String   @id @map("col_id") @default(uuid())
+  taskName            String   @map("col_task_name")
+  action              String?  @map("col_action")
+  description         String?  @map("col_description")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_task_log_tbl")
+}
+
+/// 通知表
+model SysNotification {
+  id                  String   @id @map("col_id") @default(uuid())
+  title               String   @map("col_title")
+  content             String?  @db.Text @map("col_content")
+  type                String?  @map("col_type")
+  status              String?  @map("col_status") @default("unread")
+  priority            Int?     @map("col_priority") @default(0)
+  recipient           String?  @map("col_recipient")
+  readDate            DateTime? @map("col_read_date")
+  remark              String?  @map("col_remark")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_notification_tbl")
+}
+
+/// 城市区划表
+model SysCity {
+  id                  String   @id @map("col_id") @default(uuid())
+  code                String   @unique @map("col_code")
+  name                String   @map("col_name")
+  level               Int?     @map("col_level")
+  parentCode          String?  @map("col_parent_code")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_city_tbl")
+}
+
+/// APK版本管理表
+model SysApk {
+  id                  String   @id @map("col_id") @default(uuid())
+  version             String   @unique @map("col_version")
+  versionCode         Int?     @map("col_version_code")
+  downloadUrl         String?  @map("col_download_url")
+  size                BigInt?  @map("col_size")
+  status              String?  @map("col_status") @default("active")
+  forceUpdate         Boolean  @default(false) @map("col_force_update")
+  description         String?  @map("col_description")
+  createdByUserDomain String?  @map("col_created_by_user_domain")
+  createdByUserId     String?  @map("col_created_by_user_id")
+  createdDate         DateTime? @map("col_created_date") @default(now())
+  updatedByUserDomain String?  @map("col_updated_by_user_domain")
+  updatedByUserId     String?  @map("col_updated_by_user_id")
+  updatedDate         DateTime? @map("col_updated_date") @updatedAt
+
+  @@map("sys_apk_tbl")
+}
+
+/// 序列生成器
+model SysCommonsSequence {
+  id                  String   @id @map("col_id") @default(uuid())
+  name                String   @unique @map("col_name")
+  value               BigInt   @default(1) @map("col_value")
+
+  @@map("sys_commons_sequence")
+}
+
+/// 错误消息表
+model SysCodeMessage {
+  id                  String   @id @map("col_id") @default(uuid())
+  code                String   @unique @map("col_code")
+  message             String   @map("col_message")
+  locale              String?  @map("col_locale") @default("zh_CN")
+
+  @@map("sys_code_message_tbl")
+}
