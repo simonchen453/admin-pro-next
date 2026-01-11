@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { verifyToken, getTokenFromRequest } from '@/lib/token'
 
 // POST /api/admin/job/execute - 执行定时任务
 export async function POST(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }

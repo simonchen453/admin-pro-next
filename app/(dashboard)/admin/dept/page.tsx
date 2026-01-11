@@ -16,22 +16,36 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { DataTable } from '@/components/shared/data-table'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Network, Search, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ColumnDef } from '@tanstack/react-table'
 
+interface Dept {
+  id: string
+  no: string
+  parentId: string
+  name: string
+  orderNum: number
+  linkman: string
+  contact: string
+  phone: string
+  email: string
+  status: 'active' | 'inactive'
+  children?: Dept[]
+  level?: number
+}
+
 export default function DeptManagePage() {
-  const [depts, setDepts] = useState<any[]>([])
-  const [flatDepts, setFlatDepts] = useState<any[]>([])
+  const [depts, setDepts] = useState<Dept[]>([])
+  const [flatDepts, setFlatDepts] = useState<Dept[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
-  const [selectedDept, setSelectedDept] = useState<any>(null)
+  const [selectedDept, setSelectedDept] = useState<Dept | null>(null)
   const [formData, setFormData] = useState({
     no: '',
     parentId: '',
@@ -41,8 +55,9 @@ export default function DeptManagePage() {
     contact: '',
     phone: '',
     email: '',
-    status: 'active',
+    status: 'active' as 'active' | 'inactive',
   })
+  const [globalFilter, setGlobalFilter] = useState('')
 
   useEffect(() => {
     fetchDepts()
@@ -65,8 +80,8 @@ export default function DeptManagePage() {
     }
   }
 
-  const flattenDepts = (deptList: any[], level = 0): any[] => {
-    let result: any[] = []
+  const flattenDepts = (deptList: Dept[], level = 0): Dept[] => {
+    let result: Dept[] = []
     deptList.forEach((dept) => {
       result.push({ ...dept, level })
       if (dept.children && dept.children.length > 0) {
@@ -93,24 +108,24 @@ export default function DeptManagePage() {
     setDialogOpen(true)
   }
 
-  const handleEdit = (dept: any) => {
+  const handleEdit = (dept: Dept) => {
     setDialogMode('edit')
     setSelectedDept(dept)
     setFormData({
       no: dept.no,
       parentId: dept.parentId || '',
-      name: dept.name || '',
+      name: dept.name,
       orderNum: dept.orderNum || 0,
       linkman: dept.linkman || '',
       contact: dept.contact || '',
       phone: dept.phone || '',
       email: dept.email || '',
-      status: dept.status || 'active',
+      status: dept.status,
     })
     setDialogOpen(true)
   }
 
-  const handleDelete = async (dept: any) => {
+  const handleDelete = async (dept: Dept) => {
     if (!confirm(`确定要删除部门 "${dept.name}" 吗？`)) {
       return
     }
@@ -156,49 +171,72 @@ export default function DeptManagePage() {
     }
   }
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<Dept>[] = [
     {
       accessorKey: 'name',
       header: '部门名称',
       cell: ({ row }) => (
-        <span style={{ paddingLeft: `${row.original.level * 20}px` }}>
-          {row.original.name}
-        </span>
+        <div className="flex items-center" style={{ paddingLeft: `${(row.original.level || 0) * 24}px` }}>
+          <Network className="w-4 h-4 mr-2 text-indigo-500 opacity-70" />
+          <span className="font-medium text-slate-800">{row.original.name}</span>
+        </div>
       ),
     },
-    { accessorKey: 'no', header: '部门编号' },
-    { accessorKey: 'linkman', header: '负责人' },
-    { accessorKey: 'contact', header: '联系电话' },
-    { accessorKey: 'phone', header: '手机号' },
-    { accessorKey: 'email', header: '邮箱' },
+    {
+      accessorKey: 'no',
+      header: '部门编号',
+      cell: ({ row }) => <span className="font-mono text-xs bg-slate-50 px-2 py-0.5 rounded text-slate-500 border border-slate-100">{row.original.no}</span>
+    },
+    {
+      accessorKey: 'linkman',
+      header: '负责人',
+      cell: ({ row }) => row.original.linkman ? (
+        <div className="text-xs text-slate-600">{row.original.linkman}</div>
+      ) : <span className="text-slate-300 text-xs">-</span>
+    },
+    {
+      accessorKey: 'phone',
+      header: '联系电话',
+      cell: ({ row }) => row.original.phone ? (
+        <div className="text-xs text-slate-600 font-mono">{row.original.phone}</div>
+      ) : <span className="text-slate-300 text-xs">-</span>
+    },
     {
       accessorKey: 'status',
       header: '状态',
-      cell: ({ row }) => (
-        <span
-          className={
-            row.original.status === 'active' ? 'text-green-600' : 'text-red-600'
-          }
-        >
-          {row.original.status === 'active' ? '正常' : '禁用'}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const isActive = row.original.status === 'active'
+        return (
+          <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${isActive
+            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+            : 'bg-rose-50 text-rose-600 border border-rose-100'
+            }`}>
+            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+            {isActive ? '正常' : '禁用'}
+          </div>
+        )
+      },
     },
     {
       id: 'actions',
       header: '操作',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => handleEdit(row.original)}>
-            <Pencil className="w-4 h-4" />
+        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEdit(row.original)}
+            className="h-7 w-7 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+          >
+            <Pencil className="w-3.5 h-3.5" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => handleDelete(row.original)}
-            className="text-destructive"
+            className="h-7 w-7 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
       ),
@@ -206,50 +244,106 @@ export default function DeptManagePage() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">部门管理</h1>
-          <p className="text-muted-foreground mt-1">
-            管理系统中的组织架构和部门信息
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Hero Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-dashed border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+
+        <div className="relative z-10 flex-1">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">部门管理</h1>
+          </div>
+          <p className="text-sm text-slate-500 max-w-lg pl-12">
+            配置公司组织架构与部门层级，管理部门人员与权限。
           </p>
         </div>
-        <Button onClick={handleCreate} className="gap-2">
-          <Plus className="w-4 h-4" />
-          新增部门
-        </Button>
+
+        <div className="relative z-10 flex flex-col sm:flex-row gap-3 min-w-[300px] justify-end">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="搜索部门..."
+              className="pl-9 w-full sm:w-64 bg-white/80 border-slate-200 focus:bg-white transition-all rounded-xl"
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+            />
+          </div>
+          <Button
+            onClick={handleCreate}
+            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            新增部门
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-md border bg-card p-6">
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-muted-foreground">加载中...</div>
+      <div className="bg-white/50 backdrop-blur-sm rounded-none sm:rounded-2xl">
+        {loading && flatDepts.length === 0 ? (
+          <div className="flex items-center justify-center h-64 bg-white rounded-2xl border border-slate-100">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-indigo-500 animate-spin" />
+              <p className="text-sm text-slate-400 font-medium">正在加载数据...</p>
+            </div>
           </div>
         ) : (
           <DataTable
             columns={columns}
-            data={flatDepts}
-            searchKey="name"
-            searchPlaceholder="搜索部门..."
+            data={flatDepts.filter(dept =>
+              dept.name.toLowerCase().includes(globalFilter.toLowerCase()) ||
+              dept.no.toLowerCase().includes(globalFilter.toLowerCase())
+            )}
           />
         )}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {dialogMode === 'create' ? '新增部门' : '编辑部门'}
-            </DialogTitle>
-            <DialogDescription>
-              填写部门信息，带 * 的为必填项
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-0 shadow-2xl">
+          <DialogHeader className="p-6 bg-gradient-to-br from-slate-50 to-white border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
+                <Network className="w-5 h-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-semibold text-slate-900">
+                  {dialogMode === 'create' ? '新增部门' : '编辑部门'}
+                </DialogTitle>
+                <DialogDescription className="text-slate-500">
+                  配置部门基本信息和层级关系
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <div className="grid grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="no">部门编号 *</Label>
+                <Label htmlFor="parentId" className="text-slate-700 font-medium">上级部门</Label>
+                <Select
+                  value={formData.parentId || "ROOT"}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, parentId: value === "ROOT" ? "" : value })
+                  }
+                >
+                  <SelectTrigger id="parentId" className="border-slate-200">
+                    <SelectValue placeholder="无（顶级部门）" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-64">
+                    <SelectItem value="ROOT">无（顶级部门）</SelectItem>
+                    {flatDepts.filter(d => d.id !== selectedDept?.id).map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        <span className="truncate">{'  '.repeat(dept.level || 0) + dept.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="no" className="text-slate-700 font-medium">部门编号 <span className="text-rose-500">*</span></Label>
                 <Input
                   id="no"
                   value={formData.no}
@@ -257,45 +351,61 @@ export default function DeptManagePage() {
                   disabled={dialogMode === 'edit'}
                   required
                   placeholder="如: D001"
+                  className="font-mono text-sm border-slate-200"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="parentId">上级部门</Label>
-                <Select
-                  value={formData.parentId}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, parentId: value })
-                  }
-                >
-                  <SelectTrigger id="parentId">
-                    <SelectValue placeholder="无（顶级部门）" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">无（顶级部门）</SelectItem>
-                    {flatDepts.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {'  '.repeat(dept.level) + dept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">部门名称 *</Label>
+              <Label htmlFor="name" className="text-slate-700 font-medium">部门名称 <span className="text-rose-500">*</span></Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                placeholder="例如: 研发中心"
+                className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="orderNum">排序号</Label>
+                <Label htmlFor="linkman" className="text-slate-700 font-medium">负责人</Label>
+                <Input
+                  id="linkman"
+                  value={formData.linkman}
+                  onChange={(e) =>
+                    setFormData({ ...formData, linkman: e.target.value })
+                  }
+                  className="border-slate-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-slate-700 font-medium">手机号</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="border-slate-200"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-slate-700 font-medium">邮箱</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="border-slate-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="orderNum" className="text-slate-700 font-medium">排序号</Label>
                 <Input
                   id="orderNum"
                   type="number"
@@ -303,58 +413,34 @@ export default function DeptManagePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, orderNum: parseInt(e.target.value) || 0 })
                   }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="linkman">负责人</Label>
-                <Input
-                  id="linkman"
-                  value={formData.linkman}
-                  onChange={(e) =>
-                    setFormData({ ...formData, linkman: e.target.value })
-                  }
+                  className="border-slate-200"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">手机号</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
+            <div className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+              <div className="space-y-0.5">
+                <Label htmlFor="status" className="text-base font-medium text-slate-900">启用状态</Label>
+                <p className="text-xs text-slate-500">部门停用后，该部门下的用户可能无法正常操作</p>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">邮箱</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
               <Switch
                 id="status"
                 checked={formData.status === 'active'}
                 onCheckedChange={(checked) =>
                   setFormData({ ...formData, status: checked ? 'active' : 'inactive' })
                 }
+                className="data-[state=checked]:bg-emerald-500"
               />
-              <Label htmlFor="status">启用状态</Label>
             </div>
 
-            <DialogFooter>
-              <Button type="submit">
-                {dialogMode === 'create' ? '创建' : '保存'}
+            <div className="pt-2 flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-200">
+                取消
               </Button>
-            </DialogFooter>
+              <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
+                {dialogMode === 'create' ? '创建部门' : '保存更改'}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

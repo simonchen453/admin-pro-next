@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getTokenFromRequest, verifyToken, generateId } from '@/lib/auth'
+import { generateId } from '@/lib/auth'
+import { getTokenFromRequest, verifyToken } from '@/lib/token'
+import { SysDict } from '@prisma/client'
 
 // GET /api/admin/dict - 获取字典类型列表
 export async function GET(request: NextRequest) {
@@ -10,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -20,11 +22,11 @@ export async function GET(request: NextRequest) {
 
     const where = keyword
       ? {
-          OR: [
-            { name: { contains: keyword } },
-            { display: { contains: keyword } },
-          ],
-        }
+        OR: [
+          { name: { contains: keyword } },
+          { display: { contains: keyword } },
+        ],
+      }
       : {}
 
     const dicts = await prisma.sysDict.findMany({
@@ -33,8 +35,8 @@ export async function GET(request: NextRequest) {
     })
 
     // 获取每个字典类型的数据数量
-    const dictsWithData = await Promise.all(
-      dicts.map(async (dict) => {
+    const result = await Promise.all(
+      dicts.map(async (dict: SysDict) => {
         const dataCount = await prisma.sysDictData.count({
           where: { dictName: dict.name },
         })
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    return NextResponse.json({ success: true, data: dictsWithData })
+    return NextResponse.json({ success: true, data: result })
   } catch (error) {
     console.error('获取字典列表失败:', error)
     return NextResponse.json({ success: false, message: '获取字典列表失败' }, { status: 500 })
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -104,7 +106,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -145,7 +147,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }

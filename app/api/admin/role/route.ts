@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { getTokenFromRequest, verifyToken } from '@/lib/token'
 
 // GET /api/admin/role - 获取角色列表
 export async function GET(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -116,7 +116,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }

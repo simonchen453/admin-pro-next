@@ -7,27 +7,12 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
-  LayoutDashboard,
-  Users,
-  UserCog,
-  Menu as MenuIcon,
-  Building2,
-  Briefcase,
-  Globe,
-  Settings,
-  FileText,
-  Book,
-  Clock,
-  Activity,
-  List,
-  FileCode,
-  Terminal,
-  Shield,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   Sparkles,
 } from 'lucide-react'
+import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import type { Menu } from '@/types'
 
 interface SidebarProps {
@@ -36,26 +21,8 @@ interface SidebarProps {
   onToggle: () => void
 }
 
-const menuIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  'M_HOME': LayoutDashboard,
-  'C_SYS_MGR': Settings,
-  'M_USER': Users,
-  'M_ROLE': UserCog,
-  'M_MENU': MenuIcon,
-  'M_DEPT': Building2,
-  'M_POST': Briefcase,
-  'M_DOMAIN': Globe,
-  'M_CONFIG': Settings,
-  'M_DICT': Book,
-  'M_USER_SESSION': Clock,
-  'M_JOB': Activity,
-  'M_SERVER': Terminal,
-  'M_SYS_LOG': List,
-  'M_AUDIT': FileText,
-  'M_CODE_GENERATOR': FileCode,
-  'M_SWAGGER': Terminal,
-  'M_CHANGE_PWD': Shield,
-}
+// 动态图标映射表
+
 
 export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
@@ -74,7 +41,8 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
   }
 
   const renderMenuItem = (menu: Menu, level = 0) => {
-    const Icon = menuIcons[menu.name]
+    // 使用 DynamicIcon 组件根据数据库字符串加载图标
+    // const IconComponent = menu.icon ? iconMap[menu.icon] : null
     const hasChildren = menu.children && menu.children.length > 0
     const isActive = pathname === menu.url
     const isExpanded = expandedMenus.has(menu.name)
@@ -91,7 +59,9 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
               level > 0 && 'ml-4'
             )}
           >
-            {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+            )}
+          >
+            {menu.icon && <DynamicIcon name={menu.icon} className="w-5 h-5 flex-shrink-0" />}
             {!collapsed && (
               <>
                 <span className="flex-1 text-left text-sm font-medium">{menu.display}</span>
@@ -130,7 +100,10 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
           {isActive && (
             <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-indigo-600 opacity-100 -z-10" />
           )}
-          {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+          {isActive && (
+            <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-indigo-600 opacity-100 -z-10" />
+          )}
+          {menu.icon && <DynamicIcon name={menu.icon} className="w-5 h-5 flex-shrink-0" />}
           {!collapsed && <span>{menu.display}</span>}
         </div>
       </Link>
@@ -172,31 +145,38 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
         )}
       </div>
 
-      {/* Toggle Button */}
-      <div className="relative px-4 py-3 border-b border-white/10">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className="w-full h-9 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <>
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              <span className="text-xs">收起菜单</span>
-            </>
-          )}
-        </Button>
-      </div>
-
       {/* Navigation Menu */}
       <ScrollArea className="flex-1 relative">
         <div className="px-3 py-4 space-y-1.5">
           {menus.map((menu) => renderMenuItem(menu))}
         </div>
       </ScrollArea>
+
+      {/* Footer Actions */}
+      <div className="p-3 border-t border-white/5 space-y-2">
+        {/* Toggle Button - Redesigned */}
+        <button
+          onClick={onToggle}
+          className={cn(
+            "w-full flex items-center justify-center h-10 rounded-xl transition-all duration-300",
+            "text-slate-400 hover:text-white hover:bg-white/5 group",
+            collapsed ? "px-0" : "px-4"
+          )}
+        >
+          {collapsed ? (
+            <ChevronRight className="w-5 h-5 transition-transform group-hover:scale-110" />
+          ) : (
+            <>
+              <div className="flex-1 flex items-center gap-3 overflow-hidden">
+                <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
+                  <ChevronLeft className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium truncate">收起侧边栏</span>
+              </div>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Bottom Status */}
       <div className="relative px-4 py-4 border-t border-white/10">

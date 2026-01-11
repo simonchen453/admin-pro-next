@@ -21,8 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { DataTable } from '@/components/shared/data-table'
-import { useAuthStore } from '@/stores/auth'
-import { Plus, Pencil, Trash2, KeyRound } from 'lucide-react'
+import { Plus, Pencil, Trash2, KeyRound, User, Mail, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -201,58 +200,89 @@ export default function UserManagePage() {
   }
 
   const columns: ColumnDef<any>[] = [
-    { accessorKey: 'loginName', header: '用户名' },
-    { accessorKey: 'realName', header: '姓名' },
-    { accessorKey: 'email', header: '邮箱' },
-    { accessorKey: 'mobileNo', header: '手机号' },
-    { accessorKey: 'deptNo', header: '部门' },
-    { accessorKey: 'post', header: '岗位' },
+    {
+      accessorKey: 'loginName',
+      header: '用户名',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-semibold text-xs border border-indigo-100">
+            {row.original.realName?.[0] || row.original.loginName?.[0] || 'U'}
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-slate-800">{row.original.loginName}</span>
+            <span className="text-[10px] text-slate-400">{row.original.userDomain}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      accessorKey: 'realName',
+      header: '姓名'
+    },
+    {
+      accessorKey: 'email',
+      header: '邮箱',
+      cell: ({ row }) => row.original.email ? (
+        <div className="flex items-center text-slate-500 text-xs">
+          <Mail className="w-3 h-3 mr-1.5 opacity-70" />
+          {row.original.email}
+        </div>
+      ) : <span className="text-slate-300 text-xs">-</span>
+    },
+    {
+      accessorKey: 'deptNo',
+      header: '部门',
+      cell: ({ row }) => row.original.deptNo ? (
+        <div className="flex items-center text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-100 w-fit">
+          <Building2 className="w-3 h-3 mr-1.5 text-slate-400" />
+          <span className="text-xs">{depts.find(d => d.no === row.original.deptNo)?.name || row.original.deptNo}</span>
+        </div>
+      ) : <span className="text-slate-300">-</span>
+    },
     {
       accessorKey: 'status',
       header: '状态',
-      cell: ({ row }) => (
-        <span
-          className={
-            row.original.status === 'active'
-              ? 'text-green-600'
-              : 'text-red-600'
-          }
-        >
-          {row.original.status === 'active' ? '正常' : '禁用'}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'latestLoginTime',
-      header: '最后登录',
-      cell: ({ row }) => formatDate(row.original.latestLoginTime),
+      cell: ({ row }) => {
+        const isActive = row.original.status === 'active'
+        return (
+          <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${isActive
+            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+            : 'bg-rose-50 text-rose-600 border border-rose-100'
+            }`}>
+            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isActive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+            {isActive ? '正常' : '禁用'}
+          </div>
+        )
+      },
     },
     {
       id: 'actions',
       header: '操作',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => handleEdit(row.original)}
+            className="h-7 w-7 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
           >
-            <Pencil className="w-4 h-4" />
+            <Pencil className="w-3.5 h-3.5" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => handlePassword(row.original)}
+            className="h-7 w-7 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded"
           >
-            <KeyRound className="w-4 h-4" />
+            <KeyRound className="w-3.5 h-3.5" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => handleDelete(row.original)}
-            className="text-destructive"
+            className="h-7 w-7 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
       ),
@@ -260,224 +290,262 @@ export default function UserManagePage() {
   ]
 
   return (
-    <div className="space-y-6">
-      {/* 页面标题 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">用户管理</h1>
-          <p className="text-muted-foreground mt-1">
-            管理系统中的用户账号和权限
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* 页面头部 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-dashed border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+              <User className="w-5 h-5" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">用户管理</h1>
+          </div>
+          <p className="text-sm text-slate-500 max-w-lg pl-12">
+            管理系统用户的账号、权限及状态，支持批量操作与安全设置。
           </p>
         </div>
-        <Button onClick={handleCreate} className="gap-2">
-          <Plus className="w-4 h-4" />
-          新增用户
-        </Button>
+
+        <div className="relative z-10 flex gap-3">
+          <Button
+            onClick={handleCreate}
+            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200 transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            新增用户
+          </Button>
+        </div>
       </div>
 
-      {/* 数据表格 */}
-      <div className="rounded-md border bg-card p-6">
+      {/* 数据表格区域 */}
+      <div className="bg-white/50 backdrop-blur-sm rounded-none sm:rounded-2xl">
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-muted-foreground">加载中...</div>
+          <div className="flex items-center justify-center h-64 bg-white rounded-2xl border border-slate-100">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-indigo-500 animate-spin" />
+              <p className="text-sm text-slate-400 font-medium">正在加载用户数据...</p>
+            </div>
           </div>
         ) : (
           <DataTable
             columns={columns}
             data={users}
             searchKey="loginName"
-            searchPlaceholder="搜索用户名或姓名..."
+            searchPlaceholder="搜索用户名 / 姓名..."
           />
         )}
       </div>
 
-      {/* 创建/编辑对话框 */}
+      {/* 创建/编辑对话框 - 优化版 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {dialogMode === 'create'
-                ? '新增用户'
-                : dialogMode === 'edit'
-                ? '编辑用户'
-                : '修改密码'}
-            </DialogTitle>
-            <DialogDescription>
-              {dialogMode === 'password'
-                ? '请输入新密码'
-                : '填写用户信息，带 * 的为必填项'}
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-0 shadow-2xl">
+          <DialogHeader className="p-6 bg-gradient-to-br from-slate-50 to-white border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
+                {dialogMode === 'password' ? <KeyRound className="w-5 h-5" /> : <User className="w-5 h-5" />}
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-semibold text-slate-900">
+                  {dialogMode === 'create' ? '新增用户' : dialogMode === 'edit' ? '编辑用户' : '修改密码'}
+                </DialogTitle>
+                <DialogDescription className="text-slate-500">
+                  {dialogMode === 'password' ? '重置用户的登录密码，请确保密码复杂度' : '配置用户的基本信息及角色权限'}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          {dialogMode === 'password' ? (
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">新密码 *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit">确定</Button>
-              </DialogFooter>
-            </form>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+          <div className="p-6">
+            {dialogMode === 'password' ? (
+              <form onSubmit={handlePasswordSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="userDomain">用户域 *</Label>
-                  <Select
-                    value={formData.userDomain}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, userDomain: value })
-                    }
-                    disabled={dialogMode === 'edit'}
-                  >
-                    <SelectTrigger id="userDomain">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="system">系统用户</SelectItem>
-                      <SelectItem value="intranet">局域网用户</SelectItem>
-                      <SelectItem value="internet">因特网用户</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="loginName">用户名 *</Label>
+                  <Label htmlFor="password" className="text-slate-700 font-medium">新密码 <span className="text-rose-500">*</span></Label>
                   <Input
-                    id="loginName"
-                    value={formData.loginName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, loginName: e.target.value })
-                    }
-                    disabled={dialogMode === 'edit'}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="realName">姓名 *</Label>
-                <Input
-                  id="realName"
-                  value={formData.realName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, realName: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              {dialogMode === 'create' && (
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">初始密码 *</Label>
-                  <Input
-                    id="newPassword"
+                    id="password"
                     type="password"
                     value={formData.password}
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
                     required
+                    className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20"
                   />
                 </div>
-              )}
+                <div className="flex justify-end pt-4">
+                  <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)} className="mr-2">取消</Button>
+                  <Button type="submit" className="bg-amber-500 hover:bg-amber-600 text-white">确认修改</Button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="userDomain" className="text-slate-700 font-medium">用户域 <span className="text-rose-500">*</span></Label>
+                    <Select
+                      value={formData.userDomain}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, userDomain: value })
+                      }
+                      disabled={dialogMode === 'edit'}
+                    >
+                      <SelectTrigger id="userDomain" className="border-slate-200">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="system">系统用户</SelectItem>
+                        <SelectItem value="intranet">局域网用户</SelectItem>
+                        <SelectItem value="internet">因特网用户</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="loginName" className="text-slate-700 font-medium">用户名 <span className="text-rose-500">*</span></Label>
+                    <Input
+                      id="loginName"
+                      value={formData.loginName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, loginName: e.target.value })
+                      }
+                      disabled={dialogMode === 'edit'}
+                      required
+                      className="border-slate-200"
+                      placeholder="请输入登录账号"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="email">邮箱</Label>
+                  <Label htmlFor="realName" className="text-slate-700 font-medium">姓名 <span className="text-rose-500">*</span></Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
+                    id="realName"
+                    value={formData.realName}
                     onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
+                      setFormData({ ...formData, realName: e.target.value })
                     }
+                    required
+                    className="border-slate-200"
+                    placeholder="请输入真实姓名"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="mobileNo">手机号</Label>
-                  <Input
-                    id="mobileNo"
-                    value={formData.mobileNo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, mobileNo: e.target.value })
+                {dialogMode === 'create' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword" className="text-slate-700 font-medium">初始密码 <span className="text-rose-500">*</span></Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      required
+                      className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20"
+                      placeholder="设置初始登录密码"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-slate-700 font-medium">邮箱</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className="border-slate-200"
+                      placeholder="example@admin.com"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="mobileNo" className="text-slate-700 font-medium">手机号</Label>
+                    <Input
+                      id="mobileNo"
+                      value={formData.mobileNo}
+                      onChange={(e) =>
+                        setFormData({ ...formData, mobileNo: e.target.value })
+                      }
+                      className="border-slate-200"
+                      placeholder="13800000000"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="deptNo" className="text-slate-700 font-medium">部门</Label>
+                    <Select
+                      value={formData.deptNo}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, deptNo: value })
+                      }
+                    >
+                      <SelectTrigger id="deptNo" className="border-slate-200">
+                        <SelectValue placeholder="请选择部门" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {depts.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.no}>
+                            {dept.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="post" className="text-slate-700 font-medium">岗位</Label>
+                    <Select
+                      value={formData.post}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, post: value })
+                      }
+                    >
+                      <SelectTrigger id="post" className="border-slate-200">
+                        <SelectValue placeholder="请选择岗位" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {posts.map((post) => (
+                          <SelectItem key={post.id} value={post.code}>
+                            {post.display}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="status" className="text-base font-medium text-slate-900">启用账号</Label>
+                    <p className="text-xs text-slate-500">禁用后该用户将无法登录系统</p>
+                  </div>
+                  <Switch
+                    id="status"
+                    checked={formData.status === 'active'}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, status: checked ? 'active' : 'inactive' })
                     }
+                    className="data-[state=checked]:bg-emerald-500"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="deptNo">部门</Label>
-                  <Select
-                    value={formData.deptNo}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, deptNo: value })
-                    }
-                  >
-                    <SelectTrigger id="deptNo">
-                      <SelectValue placeholder="请选择部门" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {depts.map((dept) => (
-                        <SelectItem key={dept.id} value={dept.no}>
-                          {dept.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="pt-2 flex justify-end gap-3">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-200">
+                    取消
+                  </Button>
+                  <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
+                    {dialogMode === 'create' ? '创建用户' : '保存更改'}
+                  </Button>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="post">岗位</Label>
-                  <Select
-                    value={formData.post}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, post: value })
-                    }
-                  >
-                    <SelectTrigger id="post">
-                      <SelectValue placeholder="请选择岗位" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {posts.map((post) => (
-                        <SelectItem key={post.id} value={post.code}>
-                          {post.display}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="status"
-                  checked={formData.status === 'active'}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, status: checked ? 'active' : 'inactive' })
-                  }
-                />
-                <Label htmlFor="status">启用状态</Label>
-              </div>
-
-              <DialogFooter>
-                <Button type="submit">
-                  {dialogMode === 'create' ? '创建' : '保存'}
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
+              </form>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

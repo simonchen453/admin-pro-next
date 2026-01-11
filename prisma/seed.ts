@@ -13,7 +13,7 @@ async function main() {
       { id: 'domain-001', name: 'system', display: '系统用户', isSystem: true },
       { id: 'domain-002', name: 'intranet', display: '局域网用户', isSystem: false },
       { id: 'domain-003', name: 'internet', display: '因特网用户', isSystem: false },
-    },
+    ],
     skipDuplicates: true,
   })
 
@@ -88,6 +88,8 @@ async function main() {
     { id: 'menu-012', name: 'M_USER_SESSION', display: '在线用户', parentId: 'menu-011', orderNum: 1, url: '/admin/session', type: 'C', permission: 'system:session', icon: 'Users' },
     { id: 'menu-013', name: 'M_SYS_LOG', display: '系统日志', parentId: 'menu-011', orderNum: 2, url: '/admin/syslog', type: 'C', permission: 'system:syslog', icon: 'List' },
     { id: 'menu-014', name: 'M_AUDIT', display: '审计日志', parentId: 'menu-011', orderNum: 3, url: '/admin/audit', type: 'C', permission: 'system:audit', icon: 'FileText' },
+    { id: 'menu-015', name: 'M_JOB', display: '定时任务', parentId: 'menu-011', orderNum: 4, url: '/admin/job', type: 'C', permission: 'system:job', icon: 'Activity' },
+    { id: 'menu-016', name: 'M_SERVER', display: '服务监控', parentId: 'menu-011', orderNum: 5, url: '/admin/server', type: 'C', permission: 'system:server', icon: 'Terminal' },
   ]
   await prisma.sysMenu.createMany({ data: menus, skipDuplicates: true })
 

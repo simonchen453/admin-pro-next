@@ -32,7 +32,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [focusedField, setFocusedField] = useState<string | null>(null)
-  const { setAuth } = useAuthStore()
+  const { setAuth, setMenus, setPermissions } = useAuthStore()
 
   const fetchCaptcha = async () => {
     try {
@@ -68,6 +68,8 @@ export function LoginForm() {
 
       if (data.success) {
         setAuth(data.data.user, data.data.token)
+        setMenus(data.data.menus) // Set menus
+        setPermissions(data.data.permissions) // Set permissions
         document.cookie = `auth_token=${data.data.token}; path=/; max-age=604800`
         router.push(redirect)
       } else {

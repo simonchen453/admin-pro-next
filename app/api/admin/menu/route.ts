@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { getTokenFromRequest, verifyToken } from "@/lib/token"
+import { SysMenu } from "@prisma/client"
 
 // GET /api/admin/menu - 获取菜单列表
 export async function GET(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -22,8 +23,8 @@ export async function GET(request: NextRequest) {
     // 构建菜单树
     const buildTree = (parentId: string | null = null): any[] => {
       return menus
-        .filter((m) => m.parentId === parentId)
-        .map((menu) => ({
+        .filter((m: SysMenu) => m.parentId === parentId)
+        .map((menu: SysMenu) => ({
           ...menu,
           children: buildTree(menu.id),
         }))
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -95,7 +96,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -140,7 +141,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }

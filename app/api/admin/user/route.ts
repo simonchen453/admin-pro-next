@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hashPassword, generateId } from '@/lib/auth'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { getTokenFromRequest, verifyToken } from '@/lib/token'
 
 // GET /api/admin/user - 获取用户列表
 export async function GET(request: NextRequest) {
@@ -23,13 +23,13 @@ export async function GET(request: NextRequest) {
 
     const where = keyword
       ? {
-          OR: [
-            { loginName: { contains: keyword } },
-            { realName: { contains: keyword } },
-            { email: { contains: keyword } },
-            { mobileNo: { contains: keyword } },
-          ],
-        }
+        OR: [
+          { loginName: { contains: keyword } },
+          { realName: { contains: keyword } },
+          { email: { contains: keyword } },
+          { mobileNo: { contains: keyword } },
+        ],
+      }
       : {}
 
     const [total, users] = await Promise.all([
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }
@@ -185,7 +185,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }

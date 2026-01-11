@@ -31,7 +31,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <div className="flex">
         <Sidebar
           menus={menus}
