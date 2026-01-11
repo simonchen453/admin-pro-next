@@ -1,232 +1,176 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuthStore } from '@/stores/auth'
 import {
   Users,
-  UserCog,
   Building2,
+  FileText,
   Activity,
   TrendingUp,
-  Clock,
-  CheckCircle,
-  AlertCircle,
+  TrendingDown,
+  Plus,
 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+interface StatCardProps {
+  title: string
+  value: string | number
+  change?: number
+  icon: React.ReactNode
+  trend?: 'up' | 'down'
+}
+
+function StatCard({ title, value, change, icon, trend }: StatCardProps) {
+  return (
+    <Card className="border-slate-200 hover:shadow-lg transition-shadow duration-200">
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+          {icon}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-1">
+        <div className="text-2xl font-bold text-slate-900">{value}</div>
+        {change !== undefined && (
+          <p className="text-xs text-slate-500 flex items-center gap-1">
+            {trend === 'up' ? (
+              <>
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-emerald-600 font-medium">+{change}%</span>
+              </>
+            ) : (
+              <>
+                <TrendingDown className="w-3.5 h-3.5 text-red-600" />
+                <span className="text-red-600 font-medium">{change}%</span>
+              </>
+            )}
+            <span className="ml-0.5">较上月</span>
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function HomePage() {
-  const { user } = useAuthStore()
-  const [greeting, setGreeting] = useState('')
-
-  useEffect(() => {
-    const hour = new Date().getHours()
-    if (hour < 6) setGreeting('夜深了')
-    else if (hour < 9) setGreeting('早上好')
-    else if (hour < 12) setGreeting('上午好')
-    else if (hour < 14) setGreeting('中午好')
-    else if (hour < 18) setGreeting('下午好')
-    else if (hour < 22) setGreeting('晚上好')
-    else setGreeting('夜深了')
-  }, [])
-
-  const stats = [
-    {
-      title: '用户总数',
-      value: '1,234',
-      change: '+12%',
-      icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
-    },
-    {
-      title: '角色数量',
-      value: '24',
-      change: '+2',
-      icon: UserCog,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/20',
-    },
-    {
-      title: '部门数量',
-      value: '18',
-      change: '+1',
-      icon: Building2,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100 dark:bg-green-900/20',
-    },
-    {
-      title: '在线用户',
-      value: '89',
-      change: '+5',
-      icon: Activity,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100 dark:bg-orange-900/20',
-    },
-  ]
-
-  const quickActions = [
-    { name: '用户管理', href: '/admin/user', color: 'bg-blue-500' },
-    { name: '角色管理', href: '/admin/role', color: 'bg-purple-500' },
-    { name: '菜单管理', href: '/admin/menu', color: 'bg-green-500' },
-    { name: '部门管理', href: '/admin/dept', color: 'bg-orange-500' },
-    { name: '系统配置', href: '/admin/config', color: 'bg-pink-500' },
-    { name: '系统日志', href: '/admin/syslog', color: 'bg-indigo-500' },
-  ]
-
-  const recentActivities = [
-    { id: 1, user: '张三', action: '创建了用户', time: '5 分钟前', status: 'success' },
-    { id: 2, user: '李四', action: '修改了角色权限', time: '10 分钟前', status: 'success' },
-    { id: 3, user: '王五', action: '删除了部门', time: '15 分钟前', status: 'warning' },
-    { id: 4, user: '赵六', action: '导出了数据', time: '20 分钟前', status: 'success' },
-    { id: 5, user: '系统', action: '定时任务执行', time: '30 分钟前', status: 'info' },
-  ]
-
   return (
-    <div className="space-y-6">
-      {/* 欢迎标语 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {greeting}，{user?.displayName || user?.loginName}！
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            欢迎回到 Admin-Pro Next 管理系统
-          </p>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {new Date().toLocaleDateString('zh-CN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            weekday: 'long',
-          })}
-        </div>
+    <div className="space-y-8 max-w-7xl">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-6 md:p-8 text-white shadow-lg">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1.5">欢迎回来！</h1>
+        <p className="text-violet-100 text-sm md:text-base">今天也是充满活力的一天，让我们开始工作吧</p>
       </div>
 
-      {/* 统计卡片 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon
-          return (
-            <Card key={stat.title} className="overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`w-4 h-4 ${stat.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3" />
-                  较上周 {stat.change}
-                </p>
-              </CardContent>
-            </Card>
-          )
-        })}
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="总用户数"
+          value="2,543"
+          change={12.5}
+          trend="up"
+          icon={<Users className="w-5 h-5 text-white" />}
+        />
+        <StatCard
+          title="部门数量"
+          value="48"
+          change={3.2}
+          trend="up"
+          icon={<Building2 className="w-5 h-5 text-white" />}
+        />
+        <StatCard
+          title="系统日志"
+          value="15,234"
+          change={-2.4}
+          trend="down"
+          icon={<FileText className="w-5 h-5 text-white" />}
+        />
+        <StatCard
+          title="活跃会话"
+          value="186"
+          change={8.1}
+          trend="up"
+          icon={<Activity className="w-5 h-5 text-white" />}
+        />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        {/* 快捷操作 */}
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>快捷操作</CardTitle>
-            <CardDescription>常用功能快速入口</CardDescription>
+      {/* Main Content Grid */}
+      <div className="grid gap-6 md:grid-cols-7">
+        {/* Quick Actions */}
+        <Card className="md:col-span-4 border-slate-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-slate-900">快捷操作</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
-              {quickActions.map((action) => (
-                <a
-                  key={action.name}
-                  href={action.href}
-                  className="flex items-center gap-3 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer"
-                >
-                  <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center`}>
-                    <div className="w-5 h-5 bg-white/20 rounded" />
-                  </div>
-                  <span className="font-medium">{action.name}</span>
-                </a>
-              ))}
+              <button className="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all duration-200 text-left group">
+                <div className="w-12 h-12 rounded-xl bg-violet-100 group-hover:bg-violet-200 flex items-center justify-center transition-colors">
+                  <Users className="w-6 h-6 text-violet-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-900 text-sm">添加用户</h3>
+                  <p className="text-xs text-slate-500 truncate">快速创建新用户账户</p>
+                </div>
+                <Plus className="w-5 h-5 text-slate-400 group-hover:text-violet-600 transition-colors" />
+              </button>
+
+              <button className="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all duration-200 text-left group">
+                <div className="w-12 h-12 rounded-xl bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center transition-colors">
+                  <Building2 className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-900 text-sm">部门管理</h3>
+                  <p className="text-xs text-slate-500 truncate">组织架构维护</p>
+                </div>
+                <Plus className="w-5 h-5 text-slate-400 group-hover:text-violet-600 transition-colors" />
+              </button>
+
+              <button className="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all duration-200 text-left group">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-900 text-sm">查看日志</h3>
+                  <p className="text-xs text-slate-500 truncate">系统操作审计</p>
+                </div>
+                <Plus className="w-5 h-5 text-slate-400 group-hover:text-violet-600 transition-colors" />
+              </button>
+
+              <button className="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all duration-200 text-left group">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 group-hover:bg-emerald-200 flex items-center justify-center transition-colors">
+                  <Activity className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-900 text-sm">系统监控</h3>
+                  <p className="text-xs text-slate-500 truncate">实时性能状态</p>
+                </div>
+                <Plus className="w-5 h-5 text-slate-400 group-hover:text-violet-600 transition-colors" />
+              </button>
             </div>
           </CardContent>
         </Card>
 
-        {/* 最近活动 */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>最近活动</CardTitle>
-            <CardDescription>系统最新动态</CardDescription>
+        {/* Recent Activity */}
+        <Card className="md:col-span-3 border-slate-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-slate-900">最近活动</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3">
-                  <div
-                    className={`mt-0.5 w-2 h-2 rounded-full ${
-                      activity.status === 'success'
-                        ? 'bg-green-500'
-                        : activity.status === 'warning'
-                        ? 'bg-yellow-500'
-                        : 'bg-blue-500'
-                    }`}
-                  />
+              {[
+                { user: '张三', action: '创建了新用户', target: 'user_001', time: '2 分钟前', color: 'bg-violet-500' },
+                { user: '李四', action: '修改了角色权限', target: '管理员角色', time: '15 分钟前', color: 'bg-blue-500' },
+                { user: '王五', action: '删除了部门', target: '测试部门', time: '1 小时前', color: 'bg-red-500' },
+                { user: '赵六', action: '更新了系统配置', target: 'SMTP设置', time: '2 小时前', color: 'bg-emerald-500' },
+              ].map((activity, index) => (
+                <div key={index} className="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div className={`w-2 h-2 rounded-full ${activity.color} mt-2 flex-shrink-0`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm">
+                    <p className="text-sm text-slate-900">
                       <span className="font-medium">{activity.user}</span>
-                      <span className="text-muted-foreground">{activity.action}</span>
+                      <span className="text-slate-600"> {activity.action} </span>
+                      <span className="font-medium text-violet-600">{activity.target}</span>
                     </p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <Clock className="w-3 h-3" />
-                      {activity.time}
-                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">{activity.time}</p>
                   </div>
                 </div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 系统状态 */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">CPU 使用率</CardTitle>
-            <Activity className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">32%</div>
-            <div className="mt-2 h-2 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full w-[32%] bg-blue-500 rounded-full" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">内存使用率</CardTitle>
-            <CheckCircle className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">68%</div>
-            <div className="mt-2 h-2 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full w-[68%] bg-green-500 rounded-full" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">磁盘使用率</CardTitle>
-            <AlertCircle className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">45%</div>
-            <div className="mt-2 h-2 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full w-[45%] bg-orange-500 rounded-full" />
             </div>
           </CardContent>
         </Card>

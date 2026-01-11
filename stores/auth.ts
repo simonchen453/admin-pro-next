@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      isLoading: true,
+      isLoading: false, // 改为 false，避免刷新后卡在加载状态
       permissions: [],
       menus: [],
 

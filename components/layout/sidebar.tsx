@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import {
   LayoutDashboard,
   Users,
@@ -26,6 +25,8 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Sparkles,
 } from 'lucide-react'
 import type { Menu } from '@/types'
 
@@ -84,20 +85,20 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
           <button
             onClick={() => toggleMenu(menu.name)}
             className={cn(
-              'w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all-300',
-              'hover:bg-accent hover:text-accent-foreground',
-              isExpanded && 'bg-accent/50',
+              'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+              'text-slate-400 hover:bg-white/5 hover:text-white',
+              isExpanded && 'bg-white/5 text-white',
               level > 0 && 'ml-4'
             )}
           >
-            {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+            {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
             {!collapsed && (
               <>
-                <span className="flex-1 text-left text-sm">{menu.display}</span>
-                <ChevronRight
+                <span className="flex-1 text-left text-sm font-medium">{menu.display}</span>
+                <ChevronDown
                   className={cn(
-                    'w-4 h-4 transition-transform',
-                    isExpanded && 'rotate-90'
+                    'w-4 h-4 transition-transform duration-200',
+                    isExpanded && 'rotate-180'
                   )}
                 />
               </>
@@ -118,13 +119,14 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
       <Link key={menu.id} href={menu.url}>
         <div
           className={cn(
-            'flex items-center gap-2 px-3 py-2 rounded-lg transition-all-300 text-sm',
-            'hover:bg-accent hover:text-accent-foreground',
-            isActive && 'bg-primary text-primary-foreground hover:bg-primary/90',
+            'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium',
+            'text-slate-400 hover:bg-white/5 hover:text-white relative',
+            isActive && 'bg-violet-600/20 text-violet-300 hover:bg-violet-600/30 border-l-4 border-violet-500',
+            !isActive && 'hover:translate-x-0.5',
             level > 0 && 'ml-4'
           )}
         >
-          {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+          {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
           {!collapsed && <span>{menu.display}</span>}
         </div>
       </Link>
@@ -134,48 +136,74 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
   return (
     <div
       className={cn(
-        'flex flex-col border-r bg-background transition-all duration-300',
-        collapsed ? 'w-16' : 'w-64'
+        'flex flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 transition-all duration-300 relative',
+        collapsed ? 'w-20' : 'w-64'
       )}
     >
-      {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-4 border-b">
+      {/* Subtle Pattern Overlay */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+
+      {/* Logo Area */}
+      <div className="relative flex items-center justify-between h-20 px-5 border-b border-white/10">
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Admin-Pro
-            </span>
+            <div>
+              <h1 className="text-lg font-bold text-white">Admin Pro</h1>
+              <p className="text-xs text-slate-500">企业管理系统</p>
+            </div>
           </div>
         )}
+        {collapsed && (
+          <div className="mx-auto flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+        )}
+      </div>
+
+      {/* Toggle Button */}
+      <div className="relative px-4 py-3 border-b border-white/10">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={onToggle}
-          className="h-8 w-8"
+          className="w-full h-9 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />
           ) : (
-            <ChevronLeft className="w-4 h-4" />
+            <>
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              <span className="text-xs">收起菜单</span>
+            </>
           )}
         </Button>
       </div>
 
-      {/* 菜单 */}
-      <ScrollArea className="flex-1 px-2 py-4">
-        <div className="space-y-1">
+      {/* Navigation Menu */}
+      <ScrollArea className="flex-1 relative">
+        <div className="px-3 py-4 space-y-1.5">
           {menus.map((menu) => renderMenuItem(menu))}
         </div>
       </ScrollArea>
 
-      {/* 底部 */}
-      <div className="p-4 border-t">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          {!collapsed && <span>系统运行正常</span>}
+      {/* Bottom Status */}
+      <div className="relative px-4 py-4 border-t border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50" />
+          {!collapsed && (
+            <div className="flex-1">
+              <p className="text-xs text-slate-400">系统运行正常</p>
+              <p className="text-[10px] text-slate-600 mt-0.5">All systems operational</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
