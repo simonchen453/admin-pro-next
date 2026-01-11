@@ -3,7 +3,12 @@ import type { NextRequest } from 'next/server'
 import { verifyToken } from './lib/token'
 
 // 公开路径列表（无需认证）
-const publicPaths = ['/login', '/api/auth/login', '/api/auth/captcha']
+const publicPaths = new Set([
+  '/login',
+  '/api/auth/login',
+  '/api/auth/captcha',
+  '/api/auth/logout',
+])
 
 // 路径与权限映射表
 const routePermissionMap: Record<string, string> = {
@@ -12,8 +17,6 @@ const routePermissionMap: Record<string, string> = {
   '/admin/menu': 'system:menu',
   '/admin/dept': 'system:dept',
   '/admin/post': 'system:post',
-  '/admin/domain': 'system:domain',
-  '/admin/userDomainEnv': 'system:user_domain_env',
   '/admin/config': 'system:config',
   '/admin/dict': 'system:dict',
   '/admin/session': 'system:session',
@@ -21,23 +24,34 @@ const routePermissionMap: Record<string, string> = {
   '/admin/server': 'system:server',
   '/admin/syslog': 'system:syslog',
   '/admin/audit': 'system:audit',
-  '/admin/generator': 'system:generator',
-  '/admin/swagger': 'system:swagger',
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // 获取 token
+  const token = request.cookies.get('auth_token')?.value ||
+                request.headers.get('authorization')?.replace('Bearer ', '')
+
+  // 已登录用户访问登录页，重定向到首页
+  if (pathname === '/login' || pathname === '/login/') {
+    if (token) {
+      const payload = await verifyToken(token)
+      if (payload) {
+        return NextResponse.redirect(new URL('/home', request.url))
+      }
+    }
+    // 未登录用户访问登录页，直接放行
+    return NextResponse.next()
+  }
+
   // 公开路径直接放行
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
+  if (publicPaths.has(pathname)) {
     return NextResponse.next()
   }
 
   // API 路由的认证处理
   if (pathname.startsWith('/api/')) {
-    const token = request.cookies.get('auth_token')?.value ||
-      request.headers.get('authorization')?.replace('Bearer ', '')
-
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -56,18 +70,14 @@ export async function proxy(request: NextRequest) {
   }
 
   // 页面路由的认证处理
-  const token = request.cookies.get('auth_token')?.value
-
   if (!token) {
     const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
   const payload = await verifyToken(token)
   if (!payload) {
     const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
