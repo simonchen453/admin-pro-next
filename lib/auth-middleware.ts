@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTokenFromRequest, verifyToken, JWTPayload } from './token'
+import { verifySession } from './session'
 import { ApiError, ApiResponse, errorResponse } from './api-handler'
 
 /**
@@ -37,6 +38,12 @@ export function withAuth(handler: AuthenticatedHandler) {
             return errorResponse('Token 无效或已过期', 401, undefined, 'TOKEN_INVALID')
         }
 
+        // 验证会话 (有状态数据库验证 - 支持强制下线)
+        const isValidSession = await verifySession(token)
+        if (!isValidSession) {
+            return errorResponse('会话已失效，请重新登录', 401, undefined, 'SESSION_EXPIRED')
+        }
+
         // 创建认证上下文
         const auth: AuthContext = {
             user: payload,
@@ -66,6 +73,12 @@ export function withAuthAndErrorHandler(handler: AuthenticatedHandler) {
 
             if (!payload) {
                 throw new ApiError(401, 'Token 无效或已过期', 'TOKEN_INVALID')
+            }
+
+            // 验证会话 (有状态数据库验证 - 支持强制下线)
+            const isValidSession = await verifySession(token)
+            if (!isValidSession) {
+                throw new ApiError(401, '会话已失效，请重新登录', 'SESSION_EXPIRED')
             }
 
             // 创建认证上下文

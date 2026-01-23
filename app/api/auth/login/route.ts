@@ -6,6 +6,7 @@ import { verifyCaptcha } from '@/lib/captcha'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit'
 import { loginSchema } from '@/lib/validation/schemas'
 import { withErrorHandler, ApiError } from '@/lib/api-handler'
+import { createSession } from '@/lib/session'
 import type { LoginResponse } from '@/types'
 
 // Cookie 配置
@@ -131,7 +132,14 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     data: { latestLoginTime: new Date() },
   })
 
-  // 13. 创建登录记录
+  // 13. 创建会话 (MySQL + LRU Cache)
+  await createSession(token, {
+    userId: user.userId,
+    userDomain: user.userDomain,
+    loginName: user.loginName || '',
+  }, request.headers.get('user-agent') || 'unknown')
+
+  // 14. 创建登录记录
   await prisma.sysLoginInfo.create({
     data: {
       userDomain: user.userDomain,

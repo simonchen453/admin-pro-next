@@ -1,21 +1,31 @@
 import { NextResponse } from 'next/server'
 import { getTokenFromRequest } from '@/lib/token'
-import { prisma } from '@/lib/prisma'
+import { revokeSession } from '@/lib/session'
 
 export async function POST(request: Request) {
   try {
     const token = getTokenFromRequest(request)
 
     if (token) {
-      // 创建登出记录
-      // 这里可以添加更多的登出逻辑，比如清除session等
+      // 销毁会话 (清理 Cache + 删除 DB)
+      await revokeSession(token)
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: '退出成功',
     })
+
+    // 清除 Cookie
+    response.cookies.set('auth_token', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      path: '/',
+    })
+
+    return response
   } catch (error) {
+    console.error('Logout error:', error)
     return NextResponse.json(
       {
         success: false,
