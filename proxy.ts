@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
 
   // 获取 token
   const token = request.cookies.get('auth_token')?.value ||
-                request.headers.get('authorization')?.replace('Bearer ', '')
+    request.headers.get('authorization')?.replace('Bearer ', '')
 
   // 已登录用户访问登录页，重定向到首页
   if (pathname === '/login' || pathname === '/login/') {
@@ -84,8 +84,16 @@ export async function proxy(request: NextRequest) {
   // 检查路径权限
   const requiredPermission = getRequiredPermission(pathname)
   if (requiredPermission) {
-    // 这里简化处理，实际应该从数据库或缓存中获取用户权限
-    // 暂时跳过详细权限检查
+    // 从数据库获取用户权限（带缓存）
+    const { getUserPermissions } = await import('./lib/permission')
+    const userPermissions = await getUserPermissions(payload.userDomain, payload.userId)
+
+    // 验证权限
+    if (!userPermissions.includes(requiredPermission)) {
+      // 无权限，重定向到403页面
+      const forbiddenUrl = new URL('/403', request.url)
+      return NextResponse.redirect(forbiddenUrl)
+    }
   }
 
   // 添加用户信息到请求头

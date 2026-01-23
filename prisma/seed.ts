@@ -93,22 +93,22 @@ async function main() {
   ]
   await prisma.sysMenu.createMany({ data: menus, skipDuplicates: true })
 
-  // 7. 为超级管理员分配所有菜单权限
+  // 7. 为超级管理员分配所有菜单权限（使用 ID 关联）
   console.log('为超级管理员分配菜单权限...')
   const allMenus = await prisma.sysMenu.findMany()
   const roleMenus = allMenus.map((menu) => ({
     id: `rma-${Math.random().toString(36).substr(2, 9)}`,
-    roleName: 'SUPER_ADMIN',
-    menuName: menu.name,
+    roleId: 'role-001',  // SUPER_ADMIN 角色 ID
+    menuId: menu.id,
   }))
   await prisma.sysRoleMenuAssign.createMany({ data: roleMenus, skipDuplicates: true })
 
-  // 8. 为管理员分配部分菜单权限
+  // 8. 为管理员分配部分菜单权限（使用 ID 关联）
   const adminMenus = allMenus.filter((m) => !m.name.includes('DOMAIN'))
   const adminRoleMenus = adminMenus.map((menu) => ({
     id: `rma-${Math.random().toString(36).substr(2, 9)}`,
-    roleName: 'ADMIN',
-    menuName: menu.name,
+    roleId: 'role-002',  // ADMIN 角色 ID
+    menuId: menu.id,
   }))
   await prisma.sysRoleMenuAssign.createMany({ data: adminRoleMenus, skipDuplicates: true })
 
@@ -170,13 +170,13 @@ async function main() {
     skipDuplicates: true,
   })
 
-  // 10. 为用户分配角色
+  // 10. 为用户分配角色（使用 ID 关联）
   console.log('为用户分配角色...')
   await prisma.sysUserRoleAssign.createMany({
     data: [
-      { id: 'ura-001', userDomain: 'system', userId: 'U001', roleName: 'SUPER_ADMIN' },
-      { id: 'ura-002', userDomain: 'system', userId: 'U002', roleName: 'ADMIN' },
-      { id: 'ura-003', userDomain: 'system', userId: 'U003', roleName: 'USER' },
+      { id: 'ura-001', userDomain: 'system', userId: 'U001', roleId: 'role-001' },  // admin -> SUPER_ADMIN
+      { id: 'ura-002', userDomain: 'system', userId: 'U002', roleId: 'role-002' },  // test -> ADMIN
+      { id: 'ura-003', userDomain: 'system', userId: 'U003', roleId: 'role-003' },  // lisi -> USER
     ],
     skipDuplicates: true,
   })

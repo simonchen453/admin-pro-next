@@ -59,8 +59,6 @@ export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
               level > 0 && 'ml-4'
             )}
           >
-            )}
-          >
             {menu.icon && <DynamicIcon name={menu.icon} className="w-5 h-5 flex-shrink-0" />}
             {!collapsed && (
               <>

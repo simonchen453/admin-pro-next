@@ -10,33 +10,39 @@ async function main() {
         // 创建默认管理员用户
         const hashedPassword = await hashPassword('admin123')
 
-        const admin = await prisma.sysUser.upsert({
+        // 先尝试查找现有用户
+        const existingAdmin = await prisma.sysUser.findFirst({
             where: {
-                uniqueUserDomainLogin: {
-                    userDomain: 'system',
-                    loginName: 'admin',
-                },
-            },
-            update: {},
-            create: {
                 userDomain: 'system',
-                userId: 'admin',
                 loginName: 'admin',
-                display: '系统管理员',
-                realName: '管理员',
-                email: 'admin@admin.com',
-                status: 'Active',
-                authenticated: 'Yes',
-                isSystem: 'Yes',
-                pwd: hashedPassword,
-                sex: 'Male',
-                createdByUserDomain: 'system',
-                createdByUserId: 'system',
-                createdDate: new Date(),
             },
         })
 
-        console.log('✅ 默认管理员用户已创建:', admin.loginName)
+        let admin
+        if (existingAdmin) {
+            console.log('管理员用户已存在，跳过创建')
+            admin = existingAdmin
+        } else {
+            admin = await prisma.sysUser.create({
+                data: {
+                    userDomain: 'system',
+                    userId: 'admin',
+                    loginName: 'admin',
+                    display: '系统管理员',
+                    realName: '管理员',
+                    email: 'admin@admin.com',
+                    status: 'active',
+                    authenticated: true,
+                    isSystem: true,
+                    pwd: hashedPassword,
+                    sex: 'male',
+                    createdByUserDomain: 'system',
+                    createdByUserId: 'system',
+                },
+            })
+            console.log('✅ 默认管理员用户已创建')
+        }
+
         console.log('   用户名: admin')
         console.log('   密码: admin123')
         console.log('   环境: system')

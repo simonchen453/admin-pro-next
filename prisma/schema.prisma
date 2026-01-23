@@ -101,7 +101,16 @@ model SysUser {
   updatedByUserId      String?    @map("col_updated_by_user_id")
   updatedDate          DateTime?  @map("col_updated_date") @updatedAt
 
+  // Relations
+  userRoles            SysUserRoleAssign[]
+  userMenus            SysUserMenuAssign[]
+  userPosts            SysUserPostAssign[]
+
   @@unique([userDomain, userId], name: "unq_user_domain")
+  @@index([userDomain, status])
+  @@index([loginName])
+  @@index([email])
+  @@index([mobileNo])
   @@map("sys_user_tbl")
 }
 
@@ -174,6 +183,11 @@ model SysRole {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
+  // Relations
+  userRoles           SysUserRoleAssign[]
+  roleMenus           SysRoleMenuAssign[]
+
+  @@index([status])
   @@map("sys_role_tbl")
 }
 
@@ -199,6 +213,13 @@ model SysMenu {
   updatedByUserId     String?   @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
+  // Relations
+  userMenus           SysUserMenuAssign[]
+  roleMenus           SysRoleMenuAssign[]
+
+  @@index([parentId])
+  @@index([status])
+  @@index([permission])
   @@map("sys_menu_tbl")
 }
 
@@ -245,6 +266,10 @@ model SysPost {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
+  // Relations
+  userPosts           SysUserPostAssign[]
+
+  @@index([status])
   @@map("sys_post_tbl")
 }
 
@@ -253,7 +278,7 @@ model SysUserRoleAssign {
   id                  String   @id @map("col_id") @default(uuid())
   userDomain          String   @map("col_user_domain")
   userId              String   @map("col_user_id")
-  roleName            String   @map("col_role_name")
+  roleId              String   @map("col_role_id")
   remarks             String?  @map("col_remarks")
   createdByUserDomain String?  @map("col_created_by_user_domain")
   createdByUserId     String?  @map("col_created_by_user_id")
@@ -262,7 +287,12 @@ model SysUserRoleAssign {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
-  @@unique([userDomain, userId, roleName], name: "unq_user_role")
+  // Relations
+  user                SysUser  @relation(fields: [userDomain, userId], references: [userDomain, userId])
+  role                SysRole  @relation(fields: [roleId], references: [id])
+
+  @@unique([userDomain, userId, roleId], name: "unq_user_role")
+  @@index([roleId])
   @@map("sys_user_role_assign_tbl")
 }
 
@@ -271,7 +301,7 @@ model SysUserMenuAssign {
   id                  String   @id @map("col_id") @default(uuid())
   userDomain          String   @map("col_user_domain")
   userId              String   @map("col_user_id")
-  menuName            String   @map("col_menu_name")
+  menuId              String   @map("col_menu_id")
   remarks             String?  @map("col_remarks")
   createdByUserDomain String?  @map("col_created_by_user_domain")
   createdByUserId     String?  @map("col_created_by_user_id")
@@ -280,7 +310,12 @@ model SysUserMenuAssign {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
-  @@unique([userDomain, userId, menuName], name: "unq_user_menu")
+  // Relations
+  user                SysUser  @relation(fields: [userDomain, userId], references: [userDomain, userId])
+  menu                SysMenu  @relation(fields: [menuId], references: [id])
+
+  @@unique([userDomain, userId, menuId], name: "unq_user_menu")
+  @@index([menuId])
   @@map("sys_user_menu_assign_tbl")
 }
 
@@ -289,7 +324,7 @@ model SysUserPostAssign {
   id                  String   @id @map("col_id") @default(uuid())
   userDomain          String   @map("col_user_domain")
   userId              String   @map("col_user_id")
-  postCode            String   @map("col_post_code")
+  postId              String   @map("col_post_id")
   remarks             String?  @map("col_remarks")
   createdByUserDomain String?  @map("col_created_by_user_domain")
   createdByUserId     String?  @map("col_created_by_user_id")
@@ -298,15 +333,20 @@ model SysUserPostAssign {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
-  @@unique([userDomain, userId, postCode], name: "unq_user_post")
+  // Relations
+  user                SysUser  @relation(fields: [userDomain, userId], references: [userDomain, userId])
+  post                SysPost  @relation(fields: [postId], references: [id])
+
+  @@unique([userDomain, userId, postId], name: "unq_user_post")
+  @@index([postId])
   @@map("sys_user_post_assign_tbl")
 }
 
 /// 角色-菜单关联表
 model SysRoleMenuAssign {
   id                  String   @id @map("col_id") @default(uuid())
-  roleName            String   @map("col_role_name")
-  menuName            String   @map("col_menu_name")
+  roleId              String   @map("col_role_id")
+  menuId              String   @map("col_menu_id")
   createdByUserDomain String?  @map("col_created_by_user_domain")
   createdByUserId     String?  @map("col_created_by_user_id")
   createdDate         DateTime? @map("col_created_date") @default(now())
@@ -314,7 +354,13 @@ model SysRoleMenuAssign {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
-  @@unique([roleName, menuName], name: "unique_idx")
+  // Relations
+  role                SysRole  @relation(fields: [roleId], references: [id])
+  menu                SysMenu  @relation(fields: [menuId], references: [id])
+
+  @@unique([roleId, menuId], name: "unique_idx")
+  @@index([roleId])
+  @@index([menuId])
   @@map("sys_role_menu_assign_tbl")
 }
 
@@ -441,6 +487,9 @@ model SysSysLog {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
+  @@index([userDomain])
+  @@index([createdDate])
+  @@index([category])
   @@map("sys_sys_log_tbl")
 }
 
@@ -529,6 +578,8 @@ model SysLoginInfo {
   updatedByUserId     String?  @map("col_updated_by_user_id")
   updatedDate         DateTime? @map("col_updated_date") @updatedAt
 
+  @@index([userDomain, userId])
+  @@index([createdDate])
   @@map("sys_login_info_tbl")
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { hashPassword } from '@/lib/auth'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { hashPassword, verifyPassword } from '@/lib/auth'
+import { getTokenFromRequest, verifyToken } from '@/lib/token'
 
 // PUT /api/admin/user/password - 修改用户密码
 export async function PUT(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: '未授权' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 })
     }

@@ -1,4 +1,3 @@
-
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -6,24 +5,49 @@ const prisma = new PrismaClient()
 async function main() {
     console.log('🔍 Verifying Role-Menu Assignments...')
 
-    const roleName = 'SUPER_ADMIN'
-    const newMenus = ['M_JOB', 'M_SERVER']
+    // 先获取角色 ID
+    const role = await prisma.sysRole.findUnique({
+        where: { name: 'SUPER_ADMIN' }
+    })
 
+    if (!role) {
+        console.error('❌ SUPER_ADMIN role not found')
+        process.exit(1)
+    }
+
+    // 获取要验证的菜单
+    const newMenus = ['M_JOB', 'M_SERVER']
+    const menus = await prisma.sysMenu.findMany({
+        where: { name: { in: newMenus } },
+        select: { id: true, name: true }
+    })
+
+    const menuIds = menus.map(m => m.id)
+
+    // 使用 ID 查询关联
     const assignments = await prisma.sysRoleMenuAssign.findMany({
         where: {
-            roleName: roleName,
-            menuName: { in: newMenus }
+            roleId: role.id,
+            menuId: { in: menuIds }
+        },
+        include: {
+            menu: { select: { name: true } }
         }
     })
 
-    console.log(`\n📦 Assignments found for ${roleName}: ${assignments.length}`)
+    console.log(`\n📦 Assignments found for SUPER_ADMIN: ${assignments.length}`)
 
-    newMenus.forEach(menu => {
-        const found = assignments.find(a => a.menuName === menu)
+    newMenus.forEach(menuName => {
+        const menu = menus.find(m => m.name === menuName)
+        if (!menu) {
+            console.error(`❌ Menu ${menuName} not found`)
+            return
+        }
+        const found = assignments.find(a => a.menuId === menu.id)
         if (found) {
-            console.log(`✅ ${menu} is assigned to ${roleName}`)
+            console.log(`✅ ${menuName} is assigned to SUPER_ADMIN`)
         } else {
-            console.error(`❌ ${menu} is NOT assigned to ${roleName}`)
+            console.error(`❌ ${menuName} is NOT assigned to SUPER_ADMIN`)
         }
     })
 

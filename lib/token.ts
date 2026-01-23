@@ -1,6 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+// Critical Security: JWT_SECRET MUST be configured
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET 环境变量未配置！系统无法启动。')
+}
 const encodedSecret = new TextEncoder().encode(JWT_SECRET)
 
 /**
