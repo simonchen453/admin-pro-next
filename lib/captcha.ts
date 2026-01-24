@@ -32,8 +32,8 @@ function randomInt(min: number, max: number): number {
  */
 export function generateCaptcha(): CaptchaResult {
   const id = Math.random().toString(36).substring(2, 15)
-  const num1 = randomInt(1, 20)
-  const num2 = randomInt(1, 20)
+  let num1 = randomInt(1, 20)
+  let num2 = randomInt(1, 20)
   const operators = ['+', '-']
   const operator = operators[randomInt(0, 1)]
   let answer: number
@@ -41,6 +41,12 @@ export function generateCaptcha(): CaptchaResult {
   if (operator === '+') {
     answer = num1 + num2
   } else {
+    // 确保减法结果非负
+    if (num1 < num2) {
+      const temp = num1
+      num1 = num2
+      num2 = temp
+    }
     answer = num1 - num2
   }
 

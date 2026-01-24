@@ -22,6 +22,7 @@ import {
   User,
   ChevronDown,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export function Header() {
   const router = useRouter()
@@ -56,24 +57,27 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-slate-200">
       <div className="flex h-16 items-center gap-4 px-6">
 
         {/* Search */}
         <div className="flex-1 max-w-md">
-          <div className={`relative transition-all duration-200 ${searchFocused ? 'scale-[1.02]' : ''}`}>
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="relative">
+            <Search className={cn(
+              "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
+              searchFocused ? "text-blue-500" : "text-slate-400"
+            )} />
             <input
               type="search"
-              placeholder="搜索菜单、功能..."
+              placeholder="搜索..."
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
-              className={`w-full h-10 pl-10 pr-4 rounded-xl border bg-white text-sm transition-all duration-200
-                ${searchFocused
-                  ? 'border-violet-500 ring-4 ring-violet-500/10 shadow-md'
-                  : 'border-slate-200 hover:border-violet-300'
-                }
-                focus:outline-none placeholder:text-slate-400`}
+              className={cn(
+                "w-full h-9 pl-9 pr-4 rounded-md border text-sm transition-all outline-none",
+                searchFocused
+                  ? "border-blue-500 ring-2 ring-blue-500/10"
+                  : "border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300"
+              )}
             />
           </div>
         </div>
@@ -87,30 +91,28 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-10 w-10 rounded-xl hover:bg-slate-100 transition-colors"
+                className="relative h-9 w-9 rounded-md hover:bg-slate-100 text-slate-500"
               >
-                <Bell className="w-5 h-5 text-slate-600" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-2 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 p-0 bg-white border-slate-200 shadow-xl">
-              <div className="p-4 border-b border-slate-100">
-                <h3 className="font-semibold text-slate-900">通知</h3>
-                <p className="text-xs text-slate-500 mt-0.5">您有 3 条未读消息</p>
+            <DropdownMenuContent align="end" className="w-80 p-0 shadow-lg border-slate-200">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900">通知</h3>
               </div>
-              <div className="max-h-96 overflow-auto">
-                <div className="p-4 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100">
+              <div className="max-h-[300px] overflow-auto py-1">
+                <div className="px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer">
                   <div className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-violet-500 mt-1.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-900 font-medium">系统更新通知</p>
-                      <p className="text-xs text-slate-500 mt-1">新版本已发布，请及时更新</p>
-                      <p className="text-xs text-slate-400 mt-1">5 分钟前</p>
+                    <span className="relative flex h-2 w-2 mt-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </span>
+                    <div className="space-y-1">
+                      <p className="text-sm text-slate-900 font-medium leading-none">系统更新通知</p>
+                      <p className="text-xs text-slate-500">新版本已发布，请及时更新</p>
                     </div>
                   </div>
-                </div>
-                <div className="p-4 text-center text-sm text-slate-500">
-                  查看全部通知
                 </div>
               </div>
             </DropdownMenuContent>
@@ -121,54 +123,44 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-10 gap-2 px-3 rounded-xl hover:bg-slate-100 transition-colors"
+                className="h-9 gap-2 px-2 rounded-md hover:bg-slate-100 data-[state=open]:bg-slate-100"
               >
-                <Avatar className="w-7 h-7">
+                <Avatar className="w-6 h-6 border border-slate-200">
                   <AvatarImage src={user?.avatarUrl} />
-                  <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white text-xs font-semibold">
+                  <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-medium">
                     {getUserInitials()}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden md:inline-block text-sm font-medium text-slate-700">
                   {user?.displayName || user?.loginName}
                 </span>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-3 h-3 text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-white border-slate-200 shadow-xl">
-              <DropdownMenuLabel className="font-normal pb-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={user?.avatarUrl} />
-                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-semibold">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{user?.displayName}</p>
-                      <p className="text-xs text-slate-500 truncate">{user?.email || user?.loginName}</p>
-                    </div>
-                  </div>
+            <DropdownMenuContent align="end" className="w-56 shadow-lg border-slate-200 p-1">
+              <DropdownMenuLabel className="px-2 py-2">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none text-slate-900">{user?.displayName}</p>
+                  <p className="text-xs leading-none text-slate-500 truncate">{user?.email || user?.loginName}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-slate-100" />
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/profile" className="flex items-center gap-3 px-3 py-2">
-                  <User className="w-4 h-4 text-slate-600" />
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded-sm hover:bg-slate-50">
+                  <User className="w-4 h-4 text-slate-500" />
                   <span className="text-sm text-slate-700">个人资料</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings" className="flex items-center gap-3 px-3 py-2">
-                  <Settings className="w-4 h-4 text-slate-600" />
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded-sm hover:bg-slate-50">
+                  <Settings className="w-4 h-4 text-slate-500" />
                   <span className="text-sm text-slate-700">账户设置</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-100" />
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-3 py-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded-sm hover:bg-red-50 text-red-600 focus:text-red-700 focus:bg-red-50"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="text-sm font-medium">退出登录</span>
@@ -180,3 +172,4 @@ export function Header() {
     </header>
   )
 }
+

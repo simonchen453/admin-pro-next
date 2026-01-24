@@ -13,8 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useAuthStore } from '@/stores/auth'
-import { Loader2, AlertCircle, Sparkles, User, Lock, Globe, ArrowRight } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Loader2, AlertCircle, Building2, LayoutDashboard, Globe } from 'lucide-react'
 
 export function LoginForm() {
   const router = useRouter()
@@ -31,7 +30,6 @@ export function LoginForm() {
   const [captcha, setCaptcha] = useState<{ id: string; svg: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [focusedField, setFocusedField] = useState<string | null>(null)
   const { setAuth, setMenus, setPermissions } = useAuthStore()
 
   const fetchCaptcha = async () => {
@@ -57,7 +55,8 @@ export function LoginForm() {
     setLoading(true)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // 模拟一点网络延迟，让交互更有质感
+      await new Promise(resolve => setTimeout(resolve, 300))
 
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -68,16 +67,15 @@ export function LoginForm() {
 
       if (data.success) {
         setAuth(data.data.user, data.data.token)
-        setMenus(data.data.menus) // Set menus
-        setPermissions(data.data.permissions) // Set permissions
-        document.cookie = `auth_token=${data.data.token}; path=/; max-age=604800`
+        setMenus(data.data.menus)
+        setPermissions(data.data.permissions)
         router.push(redirect)
       } else {
         setError(data.message || '登录失败')
         fetchCaptcha()
       }
     } catch (err) {
-      setError('网络连接错误')
+      setError('网络连接错误，请稍后重试')
       fetchCaptcha()
     } finally {
       setLoading(false)
@@ -85,225 +83,147 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full h-screen lg:grid lg:grid-cols-2 overflow-hidden bg-slate-50">
-
-      {/* Left Panel - Brand & Atmosphere */}
-      <div className="hidden lg:flex relative flex-col justify-between p-12 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 overflow-hidden">
-        {/* Subtle Pattern Overlay */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
-
-        {/* Soft Gradient Orbs */}
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-600/20 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-blue-600/20 blur-[120px] animate-pulse" style={{ animationDelay: '-3s' }} />
-
-        {/* Top Branding */}
-        <div className="relative z-10 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Admin Pro</h1>
-              <p className="text-xs text-slate-400">企业管理系统</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Central Content */}
-        <div className="relative z-10 space-y-6 max-w-lg">
-          <div className="space-y-4">
-            <h2 className="text-5xl font-bold text-white leading-tight">
-              优雅高效的
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">
-                企业管理平台
-              </span>
-            </h2>
-            <p className="text-lg text-slate-400 leading-relaxed">
-              为现代企业打造的智能化管理解决方案
-            </p>
-          </div>
-
-          {/* Feature Pills */}
-          <div className="flex flex-wrap gap-3 pt-4">
-            <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-sm text-slate-300">
-              ✨ 安全可靠
-            </div>
-            <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-sm text-slate-300">
-              🚀 高效便捷
-            </div>
-            <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-sm text-slate-300">
-              💎 精致优雅
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Quote */}
+    <div className="min-h-screen w-full flex">
+      {/* 左侧品牌区域 - 极简深色风格 */}
+      <div className="hidden lg:flex w-1/2 bg-[#0F172A] relative flex-col justify-between p-16 text-white">
         <div className="relative z-10">
-          <p className="text-sm text-slate-500 italic">
-            "简约而不简单，专业而不失温度"
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+              <LayoutDashboard className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-semibold tracking-tight">Admin Pro</span>
+          </div>
+
+          <h1 className="text-4xl font-bold leading-tight max-w-md mb-6">
+            构建现代化的<br />企业级管理平台
+          </h1>
+          <p className="text-slate-400 text-lg max-w-sm leading-relaxed">
+            提供安全、高效、灵活的数字化解决方案，助力企业降本增效，实现智能化转型。
           </p>
         </div>
+
+        {/* 底部装饰 - 抽象线条 */}
+        <div className="relative z-10 flex gap-8 text-slate-500 text-sm">
+          <span>© 2024 Admin Pro Inc.</span>
+          <span>Privacy Policy</span>
+          <span>Terms of Service</span>
+        </div>
+
+        {/* 背景纹理 */}
+        <div className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)',
+            backgroundSize: '32px 32px'
+          }}>
+        </div>
+        {/* 并移除那些过分花哨的光球动画 */}
       </div>
 
-      {/* Right Panel - Login Form (Warm Light Theme) */}
-      <div className="flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-hidden">
-        {/* Subtle Decorative Elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-200/20 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200/20 rounded-full blur-[150px]" />
-
-        <div className="w-full max-w-md relative z-10">
-
-          {/* Form Header */}
-          <div className="space-y-3 mb-10 text-center lg:text-left">
-            <h3 className="text-3xl font-bold text-slate-900">欢迎回来</h3>
-            <p className="text-slate-600">请登录您的账户以继续</p>
+      {/* 右侧表单区域 - 干净的留白风格 */}
+      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8">
+        <div className="w-full max-w-[400px] space-y-8">
+          <div className="space-y-2 text-center lg:text-left">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">欢迎回来</h2>
+            <p className="text-sm text-slate-500">请输入您的凭证以访问系统</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* Domain Select */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-slate-700">登录环境</Label>
-              <Select
-                value={formData.userDomain}
-                onValueChange={(value) => setFormData({ ...formData, userDomain: value })}
-              >
-                <SelectTrigger className="h-12 bg-white border-slate-200 text-slate-900 hover:border-violet-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all rounded-xl shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-4 h-4 text-violet-500" />
-                    <SelectValue />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-xl">
-                  <SelectItem value="system">系统管理后台</SelectItem>
-                  <SelectItem value="intranet">内部办公网</SelectItem>
-                  <SelectItem value="internet">互联网接入</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="space-y-4">
+              {/* Login Domain Select */}
+              <div className="space-y-2">
+                <Label htmlFor="domain" className="text-sm font-medium text-slate-700">登录环境</Label>
+                <Select
+                  value={formData.userDomain}
+                  onValueChange={(value) => setFormData({ ...formData, userDomain: value })}
+                >
+                  <SelectTrigger id="domain" className="h-11 border-slate-200 focus:ring-blue-500/20 focus:border-blue-500">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-slate-500" />
+                      <SelectValue />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="system">系统管理后台</SelectItem>
+                    <SelectItem value="intranet">内部办公网</SelectItem>
+                    <SelectItem value="internet">互联网接入</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Username */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-slate-700">用户名</Label>
-              <div className={cn(
-                "relative group transition-all duration-200 rounded-xl overflow-hidden border bg-white shadow-sm",
-                focusedField === 'username'
-                  ? "border-violet-500 ring-4 ring-violet-500/10"
-                  : "border-slate-200 hover:border-violet-300"
-              )}>
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-violet-500 transition-colors">
-                  <User className="w-5 h-5" />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium text-slate-700">用户名</Label>
                 <Input
-                  type="text"
-                  placeholder="请输入用户名"
+                  id="username"
+                  placeholder="name@example.com"
                   value={formData.loginName}
                   onChange={(e) => setFormData({ ...formData, loginName: e.target.value })}
-                  onFocus={() => setFocusedField('username')}
-                  onBlur={() => setFocusedField(null)}
-                  className="h-12 pl-12 bg-transparent border-0 text-slate-900 placeholder:text-slate-400 focus-visible:ring-0"
+                  className="h-11 border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   required
                 />
               </div>
-            </div>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-slate-700">密码</Label>
-              <div className={cn(
-                "relative group transition-all duration-200 rounded-xl overflow-hidden border bg-white shadow-sm",
-                focusedField === 'password'
-                  ? "border-violet-500 ring-4 ring-violet-500/10"
-                  : "border-slate-200 hover:border-violet-300"
-              )}>
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-violet-500 transition-colors">
-                  <Lock className="w-5 h-5" />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-medium text-slate-700">密码</Label>
+                  <a href="#" className="text-xs text-blue-600 hover:text-blue-700 font-medium">忘记密码？</a>
                 </div>
                 <Input
+                  id="password"
                   type="password"
-                  placeholder="请输入密码"
+                  placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  className="h-12 pl-12 bg-transparent border-0 text-slate-900 placeholder:text-slate-400 focus-visible:ring-0"
+                  className="h-11 border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   required
                 />
               </div>
-            </div>
 
-            {/* Captcha */}
-            {captcha && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-slate-700">验证码</Label>
-                <div className="grid grid-cols-[1fr_140px] gap-3">
-                  <div className={cn(
-                    "relative group transition-all duration-200 rounded-xl overflow-hidden border bg-white shadow-sm",
-                    focusedField === 'captcha'
-                      ? "border-violet-500 ring-4 ring-violet-500/10"
-                      : "border-slate-200 hover:border-violet-300"
-                  )}>
+              {captcha && (
+                <div className="space-y-2">
+                  <Label htmlFor="captcha" className="text-sm font-medium text-slate-700">验证码</Label>
+                  <div className="grid grid-cols-[1fr_120px] gap-3 h-11">
                     <Input
-                      type="text"
-                      placeholder="请输入计算结果"
+                      id="captcha"
+                      placeholder="计算结果"
                       value={formData.captchaText}
                       onChange={(e) => setFormData({ ...formData, captchaText: e.target.value })}
-                      onFocus={() => setFocusedField('captcha')}
-                      onBlur={() => setFocusedField(null)}
-                      className="h-12 bg-transparent border-0 text-slate-900 placeholder:text-slate-400 focus-visible:ring-0 text-center"
+                      className="h-full border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 text-center font-medium"
                       required
                     />
+                    <div
+                      className="h-full rounded-md border border-slate-200 bg-slate-50 overflow-hidden cursor-pointer hover:border-slate-300 transition-colors flex items-center justify-center p-1"
+                      onClick={fetchCaptcha}
+                      dangerouslySetInnerHTML={{ __html: captcha.svg }}
+                      title="看不清？点击刷新"
+                    />
                   </div>
-                  <div
-                    className="h-12 rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-all border border-slate-200 bg-white shadow-sm hover:border-violet-300 hover:shadow-md flex items-center justify-center"
-                    onClick={fetchCaptcha}
-                    dangerouslySetInnerHTML={{ __html: captcha.svg }}
-                    title="点击刷新验证码"
-                  />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* Error */}
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center animate-in fade-in">
-                <AlertCircle className="w-4 h-4 mr-2 shrink-0" />
+              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md animate-in fade-in slide-in-from-top-1">
+                <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
             )}
 
-            {/* Submit Button */}
             <Button
               type="submit"
               disabled={loading}
-              className="relative w-full h-14 bg-gradient-to-r from-violet-600 via-violet-500 to-indigo-600 hover:from-violet-500 hover:via-violet-400 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-xl shadow-violet-500/30 hover:shadow-2xl hover:shadow-violet-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden group"
+              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm transition-all"
             >
-              {/* Shine Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
               {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin relative z-10" />
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  登录中...
+                </>
               ) : (
-                <span className="flex items-center justify-center gap-2 relative z-10">
-                  立即登录 <ArrowRight className="w-5 h-5" />
-                </span>
+                '登录'
               )}
             </Button>
-
           </form>
-
-          {/* Copyright */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-slate-500">
-              © 2024 Admin Pro. All rights reserved.
-            </p>
-          </div>
         </div>
       </div>
     </div>
