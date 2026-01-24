@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,34 @@ interface SidebarProps {
 
 export function Sidebar({ menus, collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
+  /* eslint-disable react-hooks/exhaustive-deps */
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set())
+
+  // Auto-expand menu based on current path
+  useEffect(() => {
+    // Helper to find parent of active menu
+    const findParentOfActive = (items: Menu[], parentName: string | null = null): string | null => {
+      for (const item of items) {
+        if (item.url === pathname) {
+          return parentName
+        }
+        if (item.children) {
+          const found = findParentOfActive(item.children, item.name)
+          if (found) return found
+        }
+      }
+      return null
+    }
+
+    const parentName = findParentOfActive(menus)
+    if (parentName) {
+      setExpandedMenus((prev) => {
+        const next = new Set(prev)
+        next.add(parentName)
+        return next
+      })
+    }
+  }, [pathname, menus])
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus((prev) => {

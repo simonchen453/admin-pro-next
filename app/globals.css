@@ -2,64 +2,70 @@
 
 @theme {
   /* Premium Dark Mode Color Palette (Deep Space / Nebula) */
-  --color-background: oklch(5% 0.05 265); /* Deep Indigo Black */
+  --color-background: oklch(5% 0.05 265);
+  /* Deep Indigo Black */
   --color-foreground: oklch(98% 0.01 240);
-  
-  --color-card: oklch(10% 0.03 265 / 0.6); /* Glassy Card */
+
+  --color-card: oklch(10% 0.03 265 / 0.6);
+  /* Glassy Card */
   --color-card-foreground: oklch(98% 0.01 240);
-  
-  --color-popover: oklch(8% 0.03 265 / 0.9);
+
+  --color-popover: oklch(8% 0.03 265);
   --color-popover-foreground: oklch(98% 0.01 240);
-  
-  --color-primary: oklch(65% 0.2 265); /* Vibrant Electric Violet */
+
+  --color-primary: oklch(50% 0.2 250);
+  /* Premium Royal Blue */
   --color-primary-foreground: oklch(98% 0 0);
-  
-  --color-secondary: oklch(20% 0.05 265);
+
+  --color-secondary: oklch(20% 0.05 250);
   --color-secondary-foreground: oklch(98% 0.01 240);
-  
-  --color-muted: oklch(15% 0.02 265);
+
+  --color-muted: oklch(15% 0.02 250);
   --color-muted-foreground: oklch(70% 0.04 250);
-  
-  --color-accent: oklch(25% 0.08 265);
+
+  --color-accent: oklch(25% 0.08 250);
   --color-accent-foreground: oklch(98% 0 0);
-  
+
   --color-destructive: oklch(50% 0.2 25);
   --color-destructive-foreground: oklch(98% 0 0);
-  
-  --color-border: oklch(20% 0.05 265); /* Subtle Borders */
-  --color-input: oklch(20% 0.05 265);
-  --color-ring: oklch(65% 0.2 265);
-  
-  --radius: 0.75rem; /* More rounded, modern feel */
+
+  --color-border: oklch(20% 0.05 250);
+  /* Subtle Borders */
+  --color-input: oklch(20% 0.05 250);
+  --color-ring: oklch(50% 0.2 250);
+
+  --radius: 0.75rem;
+  /* More rounded, modern feel */
 }
 
 /* Light Mode Overrides (Crisp / Clean) */
 @media (prefers-color-scheme: light) {
   @theme {
     --color-background: oklch(99% 0.005 240);
-    --color-foreground: oklch(15% 0.02 265);
-    
+    --color-foreground: oklch(15% 0.02 250);
+
     --color-card: oklch(100% 0 0 / 0.7);
-    --color-card-foreground: oklch(15% 0.02 265);
-    
-    --color-popover: oklch(100% 0 0 / 0.95);
-    --color-popover-foreground: oklch(15% 0.02 265);
-    
-    --color-primary: oklch(55% 0.18 265); /* Deep Violet */
+    --color-card-foreground: oklch(15% 0.02 250);
+
+    --color-popover: oklch(100% 0 0);
+    --color-popover-foreground: oklch(15% 0.02 250);
+
+    --color-primary: oklch(45% 0.16 250);
+    /* Deep Professional Blue */
     --color-primary-foreground: oklch(99% 0 0);
-    
-    --color-secondary: oklch(96% 0.01 265);
-    --color-secondary-foreground: oklch(15% 0.02 265);
-    
-    --color-muted: oklch(96% 0.01 265);
-    --color-muted-foreground: oklch(50% 0.02 265);
-    
-    --color-accent: oklch(94% 0.03 265);
-    --color-accent-foreground: oklch(15% 0.02 265);
-    
-    --color-border: oklch(90% 0.02 265);
-    --color-input: oklch(90% 0.02 265);
-    --color-ring: oklch(55% 0.18 265);
+
+    --color-secondary: oklch(96% 0.01 250);
+    --color-secondary-foreground: oklch(15% 0.02 250);
+
+    --color-muted: oklch(96% 0.01 250);
+    --color-muted-foreground: oklch(50% 0.02 250);
+
+    --color-accent: oklch(94% 0.03 250);
+    --color-accent-foreground: oklch(15% 0.02 250);
+
+    --color-border: oklch(90% 0.02 250);
+    --color-input: oklch(90% 0.02 250);
+    --color-ring: oklch(45% 0.16 250);
   }
 }
 
@@ -67,7 +73,8 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1; /* Smart ligatures & stylistic sets */
+  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  /* Smart ligatures & stylistic sets */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.5s ease;
@@ -90,9 +97,17 @@ body {
 
 /* Premium Animations */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {
@@ -100,9 +115,17 @@ body {
 }
 
 @keyframes gradient-x {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-gradient-x {
@@ -115,14 +138,17 @@ body {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--color-muted-foreground);
   border-radius: 99px;
   opacity: 0.2;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
 }

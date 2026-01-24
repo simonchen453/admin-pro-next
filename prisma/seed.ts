@@ -74,10 +74,11 @@ async function main() {
     { id: 'menu-002', name: 'C_SYS_MGR', display: '系统管理', orderNum: 2, type: 'M', icon: 'Settings' },
 
     // 系统管理子菜单
-    { id: 'menu-003', name: 'M_USER', display: '用户管理', parentId: 'menu-001', orderNum: 1, url: '/admin/user', type: 'C', permission: 'system:user', icon: 'Users' },
+    // 系统管理子菜单
+    { id: 'menu-003', name: 'M_USER', display: '用户管理', parentId: 'menu-002', orderNum: 1, url: '/admin/user', type: 'C', permission: 'system:user', icon: 'Users' },
     { id: 'menu-004', name: 'M_ROLE', display: '角色管理', parentId: 'menu-002', orderNum: 2, url: '/admin/role', type: 'C', permission: 'system:role', icon: 'UserCog' },
-    { id: 'menu-005', name: 'M_MENU', display: '菜单管理', parentId: 'menu-002', orderNum: 3, url: '/admin/menu', type: 'C', permission: 'system:menu', icon: 'MenuIcon' },
-    { id: 'menu-006', name: 'M_DEPT', display: '部门管理', parentId: 'menu-002', orderNum: 4, url: '/admin/dept', type: 'C', permission: 'system:dept', icon: 'Building2' },
+    { id: 'menu-005', name: 'M_MENU', display: '菜单管理', parentId: 'menu-002', orderNum: 3, url: '/admin/menu', type: 'C', permission: 'system:menu', icon: 'List' },
+    { id: 'menu-006', name: 'M_DEPT', display: '部门管理', parentId: 'menu-002', orderNum: 4, url: '/admin/dept', type: 'C', permission: 'system:dept', icon: 'Building' },
     { id: 'menu-007', name: 'M_POST', display: '岗位管理', parentId: 'menu-002', orderNum: 5, url: '/admin/post', type: 'C', permission: 'system:post', icon: 'Briefcase' },
     { id: 'menu-008', name: 'M_DOMAIN', display: '用户域管理', parentId: 'menu-002', orderNum: 6, url: '/admin/domain', type: 'C', permission: 'system:domain', icon: 'Globe' },
     { id: 'menu-009', name: 'M_CONFIG', display: '参数配置', parentId: 'menu-002', orderNum: 7, url: '/admin/config', type: 'C', permission: 'system:config', icon: 'Settings' },

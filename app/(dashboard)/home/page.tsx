@@ -22,7 +22,7 @@ function StatCard({ title, value, change, icon, trend }: StatCardProps) {
     <Card className="border-slate-200 hover:shadow-lg transition-shadow duration-200">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
           {icon}
         </div>
       </CardHeader>
@@ -51,11 +51,14 @@ function StatCard({ title, value, change, icon, trend }: StatCardProps) {
 
 export default function HomePage() {
   return (
-    <div className="space-y-8 max-w-7xl">
+    <div className="space-y-8 w-full">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-6 md:p-8 text-white shadow-lg">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1.5">欢迎回来！</h1>
-        <p className="text-violet-100 text-sm md:text-base">今天也是充满活力的一天，让我们开始工作吧</p>
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-6 md:p-8 text-white shadow-lg overflow-hidden relative">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div className="relative z-10">
+          <h1 className="text-2xl md:text-3xl font-bold mb-1.5">欢迎回来！</h1>
+          <p className="text-blue-100 text-sm md:text-base">今天也是充满活力的一天，让我们开始工作吧</p>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -99,9 +102,9 @@ export default function HomePage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
-              <button className="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all duration-200 text-left group">
-                <div className="w-12 h-12 rounded-xl bg-violet-100 group-hover:bg-violet-200 flex items-center justify-center transition-colors">
-                  <Users className="w-6 h-6 text-violet-600" />
+              <button className="flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 text-left group">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
+                  <Users className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-slate-900 text-sm">添加用户</h3>
@@ -154,7 +157,7 @@ export default function HomePage() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { user: '张三', action: '创建了新用户', target: 'user_001', time: '2 分钟前', color: 'bg-violet-500' },
+                { user: '张三', action: '创建了新用户', target: 'user_001', time: '2 分钟前', color: 'bg-blue-500' },
                 { user: '李四', action: '修改了角色权限', target: '管理员角色', time: '15 分钟前', color: 'bg-blue-500' },
                 { user: '王五', action: '删除了部门', target: '测试部门', time: '1 小时前', color: 'bg-red-500' },
                 { user: '赵六', action: '更新了系统配置', target: 'SMTP设置', time: '2 小时前', color: 'bg-emerald-500' },
@@ -165,7 +168,7 @@ export default function HomePage() {
                     <p className="text-sm text-slate-900">
                       <span className="font-medium">{activity.user}</span>
                       <span className="text-slate-600"> {activity.action} </span>
-                      <span className="font-medium text-violet-600">{activity.target}</span>
+                      <span className="font-medium text-blue-600">{activity.target}</span>
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">{activity.time}</p>
                   </div>
